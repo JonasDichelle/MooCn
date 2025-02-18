@@ -11,7 +11,7 @@ export default function DemoPage() {
 
   return (
     <div className="p-4">
-      {/* <h2 className="font-bold text-xl mb-2">Mucn Example</h2> */}
+      {/* <h2 className="font-bold text-xl mb-2">Moocn Example</h2> */}
       <ModeToggle />
       <SomeChartExample />
     </div>

@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import {
-  Mucn,
-  MucnProvider,
+  Moocn,
+  MoocnProvider,
   createVerticalGradient,
-  MucnLegendContent,
-  MucnTooltip,
-} from "./Mucn";
+  MoocnLegendContent,
+  MoocnTooltip,
+} from "./Moocn";
 import { wheelZoomPlugin } from "./wheelZoomPlugin";
 import {
   Card,
@@ -85,13 +85,13 @@ export default function SomeChartExample() {
         <CardTitle>Gradient + Standard Colors</CardTitle>
       </CardHeader>
       <CardContent>
-        <MucnProvider>
+        <MoocnProvider>
           <div className="flex flex-col gap-4 h-[500px]">
-            <MucnTooltip />
-            <Mucn data={myData} options={options} className="h-full w-full" />
-            <MucnLegendContent />
+            <MoocnTooltip />
+            <Moocn data={myData} options={options} className="h-full w-full" />
+            <MoocnLegendContent />
           </div>
-        </MucnProvider>
+        </MoocnProvider>
         <CardDescription>
           Zoom in/out with the mouse wheel. Middle-click and drag to pan.
           Tooltip from shadcn plugin.

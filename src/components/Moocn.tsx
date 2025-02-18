@@ -147,13 +147,13 @@ export function cloneAndResolveColors(options: UplotOptions): UplotOptions {
   return newOptions;
 }
 
-export interface MucnProps
+export interface MoocnProps
   extends Omit<React.ComponentProps<"div">, "children"> {
   options: uPlot.Options;
   data: (number | null)[][];
 }
 
-export const Mucn = React.forwardRef<uPlot | null, MucnProps>(
+export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
   (props, forwardedRef) => {
     const { options, data, className, style, ...rest } = props;
     const [hasMeasured, setHasMeasured] = React.useState(false);
@@ -191,7 +191,7 @@ export const Mucn = React.forwardRef<uPlot | null, MucnProps>(
       };
     }, [colorResolvedOpts, chartWidth, chartHeight]);
 
-    const { handleChartCreate } = React.useContext(MucnContext);
+    const { handleChartCreate } = React.useContext(MoocnContext);
     const onCreate = React.useCallback(
       (chartInstance: uPlot) => {
         handleChartCreate?.(chartInstance);
@@ -222,9 +222,9 @@ export const Mucn = React.forwardRef<uPlot | null, MucnProps>(
     );
   }
 );
-Mucn.displayName = "Mucn";
+Moocn.displayName = "Moocn";
 
-export interface MucnContextValue {
+export interface MoocnContextValue {
   chart: uPlot | null;
   cursorState: {
     idx: number | null;
@@ -234,12 +234,12 @@ export interface MucnContextValue {
   handleChartCreate?: (chart: uPlot) => void;
 }
 
-export const MucnContext = React.createContext<MucnContextValue>({
+export const MoocnContext = React.createContext<MoocnContextValue>({
   chart: null,
   cursorState: { idx: null, left: null, top: null },
 });
 
-export function MucnProvider({ children }: { children: React.ReactNode }) {
+export function MoocnProvider({ children }: { children: React.ReactNode }) {
   const [chart, setChart] = React.useState<uPlot | null>(null);
   const [cursorState, setCursorState] = React.useState({
     idx: null as number | null,
@@ -272,11 +272,12 @@ export function MucnProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <MucnContext.Provider value={ctxValue}>{children}</MucnContext.Provider>
+    <MoocnContext.Provider value={ctxValue}>{children}</MoocnContext.Provider>
   );
 }
 
-export interface MucnTooltipProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MoocnTooltipProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   showIndexValue?: boolean;
   indexValueLabel?: string;
   collisionAvoidance?: boolean;
@@ -306,8 +307,8 @@ interface TooltipItem {
   seriesRef?: uPlot.Series;
 }
 
-export const MucnTooltip = React.forwardRef<HTMLDivElement, MucnTooltipProps>(
-  function MucnTooltip(
+export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
+  function MoocnTooltip(
     {
       className,
       showIndexValue = true,
@@ -331,7 +332,7 @@ export const MucnTooltip = React.forwardRef<HTMLDivElement, MucnTooltipProps>(
       width: 0,
       height: 0,
     });
-    const { chart, cursorState } = React.useContext(MucnContext);
+    const { chart, cursorState } = React.useContext(MoocnContext);
 
     React.useLayoutEffect(() => {
       if (tooltipRef.current) {
@@ -510,19 +511,19 @@ export const MucnTooltip = React.forwardRef<HTMLDivElement, MucnTooltipProps>(
   }
 );
 
-MucnTooltip.displayName = "MucnTooltip";
+MoocnTooltip.displayName = "MoocnTooltip";
 
-export interface MucnLegendProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MoocnLegendProps extends React.HTMLAttributes<HTMLDivElement> {
   hideIcon?: boolean;
   verticalAlign?: "top" | "bottom";
   showIndexValue?: boolean;
   indexValueLabel?: string;
 }
 
-export const MucnLegendContent = React.forwardRef<
+export const MoocnLegendContent = React.forwardRef<
   HTMLDivElement,
-  MucnLegendProps
->(function MucnLegendContent(
+  MoocnLegendProps
+>(function MoocnLegendContent(
   {
     className,
     hideIcon = false,
@@ -533,7 +534,7 @@ export const MucnLegendContent = React.forwardRef<
   },
   ref
 ) {
-  const { chart, cursorState } = React.useContext(MucnContext);
+  const { chart, cursorState } = React.useContext(MoocnContext);
   const [isStale, setStale] = React.useState(false);
   const hoveredIdx = cursorState.idx;
 
