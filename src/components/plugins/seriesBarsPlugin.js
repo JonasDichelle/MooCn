@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 import { Quadtree, pointWithin } from "./lib/quadtree.js";
 import { distr, SPACE_BETWEEN } from "./lib/distr.js";
+import { computeCssColor } from "../Moocn";
 
 export function seriesBarsPlugin(opts) {
   let pxRatio = 1;
@@ -13,6 +14,11 @@ export function seriesBarsPlugin(opts) {
     dir = 1,
     stacked = false,
     disp = {},
+    groupWidth = 1.0,
+    barWidth = 1.0,
+
+    showValues = false,
+    valueColor = "black",
   } = opts;
 
   let qt;
@@ -30,10 +36,7 @@ export function seriesBarsPlugin(opts) {
     window.addEventListener("dppxchange", setPxRatio);
   }
 
-  const groupWidth = 0.9;
   const groupDistr = SPACE_BETWEEN;
-
-  const barWidth = 1;
   const barDistr = SPACE_BETWEEN;
 
   function distrTwo(
@@ -86,6 +89,7 @@ export function seriesBarsPlugin(opts) {
       },
       ...disp,
     },
+
     each: (u, seriesIdx, dataIdx, lft, top, wid, hgt) => {
       lft -= u.bbox.left;
       top -= u.bbox.top;
@@ -101,11 +105,13 @@ export function seriesBarsPlugin(opts) {
   });
 
   function drawPoints(u, sidx, i0, i1) {
+    if (!showValues) return;
+
     const ctx = u.ctx;
     ctx.save();
 
     ctx.font = font;
-    ctx.fillStyle = "black";
+    ctx.fillStyle = computeCssColor(valueColor);
 
     uPlot.orient(
       u,
@@ -154,11 +160,6 @@ export function seriesBarsPlugin(opts) {
     ctx.restore();
   }
 
-  function range(u, dataMin, dataMax) {
-    let [min, max] = uPlot.rangeNum(0, dataMax, 0.1, true);
-    return [0, max];
-  }
-
   return {
     hooks: {
       drawClear: (u) => {
@@ -177,6 +178,7 @@ export function seriesBarsPlugin(opts) {
         );
       },
     },
+
     opts: (u, optsObj) => {
       optsObj.axes = optsObj.axes || [];
 
@@ -184,23 +186,20 @@ export function seriesBarsPlugin(opts) {
         optsObj.axes[0] = {};
       }
 
-      const yScaleOpts = {
-        range,
-        ori: ori == 0 ? 1 : 0,
-      };
-
       uPlot.assign(optsObj, {
         select: { show: false },
         cursor: {
+          drag: {
+            x: true,
+            y: true,
+          },
           x: false,
           y: false,
-
           dataIdx: (u, seriesIdx) => {
             if (seriesIdx == 1) {
               hRect = null;
               let cx = u.cursor.left * pxRatio;
               let cy = u.cursor.top * pxRatio;
-
               qt.get(cx, cy, 1, 1, (o) => {
                 if (pointWithin(cx, cy, o.x, o.y, o.x + o.w, o.y + o.h)) {
                   hRect = o;
@@ -258,32 +257,7 @@ export function seriesBarsPlugin(opts) {
               return [min, max];
             },
           },
-
-          rend: yScaleOpts,
-          size: yScaleOpts,
-          mem: yScaleOpts,
-          inter: yScaleOpts,
-          toggle: yScaleOpts,
         },
-      });
-
-      if (ori == 1) {
-        optsObj.padding = [0, null, 0, null];
-      }
-
-      uPlot.assign(optsObj.axes[0], {
-        splits: (u) => {
-          const _dir = dir * (ori == 0 ? 1 : -1);
-          let splits = u._data[0].slice();
-          return _dir == 1 ? splits : splits.reverse();
-        },
-        values: (u) => u.data[0],
-        gap: 10,
-        size: ori == 0 ? 40 : 60,
-        labelSize: 20,
-        grid: { show: false },
-        ticks: { show: false },
-        side: ori == 0 ? 2 : 3,
       });
 
       optsObj.series.forEach((s, i) => {
@@ -291,7 +265,7 @@ export function seriesBarsPlugin(opts) {
           uPlot.assign(s, {
             paths: barsBuilder,
             points: {
-              show: drawPoints,
+              show: showValues ? drawPoints : false,
             },
           });
         }

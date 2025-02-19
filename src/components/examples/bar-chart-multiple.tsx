@@ -20,19 +20,6 @@ import {
 
 import { seriesBarsPlugin } from "../plugins/seriesBarsPlugin.js";
 
-function rectShape(u, seriesIdx, idx, cx, cy) {
-  if (u.cursor.idx !== idx) return;
-
-  const b = u.series[seriesIdx].points.bbox(u, seriesIdx);
-  const { left, top, width, height } = b;
-
-  if (width <= 0 || height <= 0) return;
-
-  u.ctx.fillStyle = "rgba(255,255,255,0.25)";
-
-  u.ctx.fillRect(left, top, width, height);
-}
-
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -70,7 +57,7 @@ export default function BarChartExample() {
         y: {
           range: (u, min, max) => [0, max],
         },
-        x: { time: true },
+        x: { time: false },
       },
       plugins: [
         seriesBarsPlugin({
@@ -79,21 +66,35 @@ export default function BarChartExample() {
           stacked: false,
           ignore: [],
           radius: 0.1,
+          groupWidth: 0.8,
+          barWidth: 0.95,
+          valueColor: "var(--muted-foreground)",
+          showValues: true,
+          xAxisStroke: "hsl(var(--foreground)/50%)",
+          yAxisStroke: "hsl(var(--foreground)/50%)",
         }),
       ],
       axes: [
         {
-          stroke: "var(--foreground)",
-          ticks: { stroke: "var(--border)" },
+          stroke: "var(--muted-foreground)",
           grid: { stroke: "hsl(var(--border)/50%)" },
           size: 40,
           gap: 0,
 
-          monthValues,
+          splits: (u, min, max, incr) => {
+            let len = u.data[0].length;
+            return Array.from({ length: len }, (_, i) => i);
+          },
+
+          values: (u: uPlot, splits: number[]) => {
+            return splits.map((val) => {
+              const idx = Math.round(val);
+              return chartData[idx]?.month ?? "";
+            });
+          },
         },
         {
-          stroke: "var(--foreground)",
-          ticks: { stroke: "var(--border)" },
+          stroke: "var(--muted-foreground)",
           grid: { stroke: "hsl(var(--border)/50%)" },
           size: 40,
           gap: 0,
@@ -113,14 +114,6 @@ export default function BarChartExample() {
         },
       ],
 
-      cursor: {
-        points: {
-          shape: rectShape,
-
-          size: 0,
-          width: 0,
-        },
-      },
       legend: { show: false },
     };
   }, []);
