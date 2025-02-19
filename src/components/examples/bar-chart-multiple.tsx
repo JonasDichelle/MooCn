@@ -6,17 +6,7 @@ import {
   MoocnProvider,
   MoocnLegendContent,
   MoocnTooltip,
-  createVerticalGradient,
 } from "../Moocn";
-import { wheelZoomPlugin } from "../wheelZoomPlugin";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 import { seriesBarsPlugin } from "../plugins/seriesBarsPlugin.js";
 
@@ -28,10 +18,6 @@ const chartData = [
   { month: "May", desktop: 209, mobile: 130 },
   { month: "June", desktop: 214, mobile: 140 },
 ];
-
-function monthValues(u, splits) {
-  return splits.map((i) => chartData[i]?.month ?? "");
-}
 
 const chartConfig = {
   desktop: {
@@ -50,77 +36,74 @@ const mobileVals = chartData.map((d) => d.mobile);
 
 const data = [xVals, desktopVals, mobileVals];
 
-export default function BarChartExample() {
-  const options = React.useMemo(() => {
-    return {
-      scales: {
-        y: {
-          range: (u, min, max) => [0, max],
-        },
-        x: { time: false },
+const options = {
+  scales: {
+    y: {
+      range: (u, min, max) => [0, max],
+    },
+    x: { time: false },
+  },
+  plugins: [
+    seriesBarsPlugin({
+      ori: 0,
+      dir: 1,
+      stacked: false,
+      ignore: [],
+      radius: 0.1,
+      groupWidth: 0.8,
+      barWidth: 0.95,
+      valueColor: "var(--muted-foreground)",
+      showValues: false,
+      xAxisStroke: "hsl(var(--foreground)/50%)",
+      yAxisStroke: "hsl(var(--foreground)/50%)",
+    }),
+  ],
+  axes: [
+    {
+      stroke: "var(--muted-foreground)",
+      size: 30,
+      gap: 0,
+
+      splits: (u, min, max, incr) => {
+        let len = u.data[0].length;
+        return Array.from({ length: len }, (_, i) => i);
       },
-      plugins: [
-        seriesBarsPlugin({
-          ori: 0,
-          dir: 1,
-          stacked: false,
-          ignore: [],
-          radius: 0.1,
-          groupWidth: 0.8,
-          barWidth: 0.95,
-          valueColor: "var(--muted-foreground)",
-          showValues: true,
-          xAxisStroke: "hsl(var(--foreground)/50%)",
-          yAxisStroke: "hsl(var(--foreground)/50%)",
-        }),
-      ],
-      axes: [
-        {
-          stroke: "var(--muted-foreground)",
-          grid: { stroke: "hsl(var(--border)/50%)" },
-          size: 40,
-          gap: 0,
 
-          splits: (u, min, max, incr) => {
-            let len = u.data[0].length;
-            return Array.from({ length: len }, (_, i) => i);
-          },
+      values: (u: uPlot, splits: number[]) => {
+        return splits.map((val) => {
+          const idx = Math.round(val);
+          return chartData[idx]?.month ?? "";
+        });
+      },
+    },
+    {
+      stroke: "var(--muted-foreground)",
+      grid: { stroke: "hsl(var(--border)/50%)" },
+      size: 1,
+      gap: 0,
+    },
+  ],
+  series: [
+    {},
+    {
+      label: chartConfig.desktop.label,
+      stroke: chartConfig.desktop.color,
+      fill: "hsl(var(--chart-1))",
+    },
+    {
+      label: chartConfig.mobile.label,
+      stroke: chartConfig.mobile.color,
+      fill: "hsl(var(--chart-2))",
+    },
+  ],
 
-          values: (u: uPlot, splits: number[]) => {
-            return splits.map((val) => {
-              const idx = Math.round(val);
-              return chartData[idx]?.month ?? "";
-            });
-          },
-        },
-        {
-          stroke: "var(--muted-foreground)",
-          grid: { stroke: "hsl(var(--border)/50%)" },
-          size: 40,
-          gap: 0,
-        },
-      ],
-      series: [
-        {},
-        {
-          label: chartConfig.desktop.label,
-          stroke: chartConfig.desktop.color,
-          fill: "hsl(var(--chart-1))",
-        },
-        {
-          label: chartConfig.mobile.label,
-          stroke: chartConfig.mobile.color,
-          fill: "hsl(var(--chart-2))",
-        },
-      ],
+  legend: { show: false },
+};
 
-      legend: { show: false },
-    };
-  }, []);
-
+export default function BarChartExample() {
   return (
     <MoocnProvider>
-      <div className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={data} options={options} className="h-full w-full" />
         <MoocnLegendContent />

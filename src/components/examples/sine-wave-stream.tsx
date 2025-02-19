@@ -8,7 +8,6 @@ import {
   MoocnLegendContent,
   MoocnTooltip,
 } from "../Moocn";
-import { wheelZoomPlugin } from "../wheelZoomPlugin";
 
 function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
@@ -62,11 +61,129 @@ function randomWalk(
   return points;
 }
 
+const options = {
+  scales: {
+    x: { time: false },
+    y: {
+      range: [-6, 6],
+    },
+  },
+  legend: { show: false },
+  cursor: { x: false, y: false },
+  select: { show: false },
+  axes: [
+    {
+      stroke: "var(--muted-foreground)",
+      ticks: { stroke: "var(--border)" },
+      grid: { stroke: "hsl(var(--border)/50%)" },
+      size: 30,
+      gap: 0,
+    },
+    {
+      stroke: "var(--muted-foreground)",
+      grid: { stroke: "hsl(var(--border)/0%)" },
+      size: 30,
+      gap: 0,
+    },
+  ],
+  series: [
+    {},
+
+    {
+      label: "Sine",
+      stroke: "var(--chart-1)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-1)/5%)",
+          "var(--chart-1)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+
+    {
+      label: "Series 1",
+      stroke: "var(--chart-2)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-2)/5%)",
+          "var(--chart-2)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+
+    {
+      label: "Series 2",
+      stroke: "var(--chart-3)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-3)/5%)",
+          "var(--chart-3)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+
+    {
+      label: "Series 3",
+      stroke: "var(--chart-4)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-4)/5%)",
+          "var(--chart-4)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+
+    {
+      label: "Series 4",
+      stroke: "var(--chart-5)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-5)/5%)",
+          "var(--chart-5)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+
+    {
+      label: "Series 5",
+      stroke: "var(--chart-5)",
+      fill: (u: any, si: number) =>
+        createVerticalGradient(
+          u,
+          si,
+          "hsl(var(--chart-5)/5%)",
+          "var(--chart-5)"
+        ),
+      fillAlpha: 0.2,
+      width: 2,
+      points: { show: false },
+    },
+  ],
+};
+
 export default function SineStreamChart() {
   const length = 600;
-
   const [xs, setXs] = React.useState(Array.from({ length }, (_, i) => i));
-
   const [sine, setSine] = React.useState(
     Array.from({ length }, (_, i) => Math.sin(i / 16) * 5)
   );
@@ -80,31 +197,24 @@ export default function SineStreamChart() {
   React.useEffect(() => {
     let shift = length;
     let frameId: number;
-
     function update() {
       shift++;
-
       setXs((prev) => [...prev.slice(1), shift]);
-
       setSine((prev) => [...prev.slice(1), Math.sin(shift / 16) * 5]);
-
       setR1((prev) => addRandData(prev));
       setR2((prev) => addRandData(prev));
       setR3((prev) => addRandData(prev));
       setR4((prev) => addRandData(prev));
       setR5((prev) => addRandData(prev));
-
       frameId = requestAnimationFrame(update);
     }
 
     function addRandData(data: number[]): number[] {
       const lastVal = data[data.length - 1];
-
       return [...data.slice(1), randomWalk(1, lastVal, -6, 6)[0]];
     }
 
     frameId = requestAnimationFrame(update);
-
     return () => cancelAnimationFrame(frameId);
   }, [length]);
 
@@ -112,131 +222,9 @@ export default function SineStreamChart() {
     return [xs, sine, r1, r2, r3, r4, r5];
   }, [xs, sine, r1, r2, r3, r4, r5]);
 
-  const options = React.useMemo(() => {
-    return {
-      scales: {
-        x: { time: false },
-        y: {
-          range: [-6, 6],
-        },
-      },
-      legend: { show: false },
-      cursor: { x: false, y: false },
-      plugins: [wheelZoomPlugin({ factor: 0.75 })],
-      axes: [
-        {
-          stroke: "var(--foreground)",
-          ticks: { stroke: "var(--border)" },
-          grid: { stroke: "hsl(var(--border)/50%)" },
-          size: 30,
-          gap: 0,
-        },
-        {
-          stroke: "var(--foreground)",
-          grid: { stroke: "hsl(var(--border)/0%)" },
-          size: 0,
-          gap: 0,
-        },
-      ],
-      series: [
-        {},
-
-        {
-          label: "Sine",
-          stroke: "var(--chart-1)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-1)/5%)",
-              "var(--chart-1)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-
-        {
-          label: "Series 1",
-          stroke: "var(--chart-2)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-2)/5%)",
-              "var(--chart-2)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-
-        {
-          label: "Series 2",
-          stroke: "var(--chart-3)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-3)/5%)",
-              "var(--chart-3)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-
-        {
-          label: "Series 3",
-          stroke: "var(--chart-4)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-4)/5%)",
-              "var(--chart-4)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-
-        {
-          label: "Series 4",
-          stroke: "var(--chart-5)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-5)/5%)",
-              "var(--chart-5)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-
-        {
-          label: "Series 5",
-          stroke: "var(--chart-5)",
-          fill: (u: any, si: number) =>
-            createVerticalGradient(
-              u,
-              si,
-              "hsl(var(--chart-5)/5%)",
-              "var(--chart-5)"
-            ),
-          fillAlpha: 0.2,
-          width: 2,
-          points: { show: false },
-        },
-      ],
-    };
-  }, []);
-
   return (
     <MoocnProvider>
-      <div className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={chartData} options={options} className="h-full w-full" />
         <MoocnLegendContent />

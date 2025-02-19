@@ -619,7 +619,7 @@ export const MoocnLegendContent = React.forwardRef<
       className={cn(
         "flex items-center justify-center gap-4",
         verticalAlign === "top" ? "pb-3" : "pt-3",
-        "border-t border-border/50 bg-background py-2 px-4 text-xs",
+        "border-0 border-border/50 bg-background py-2 px-4 text-xs",
         className
       )}
     >

@@ -19,7 +19,6 @@ export default function HomePage() {
       </header>
 
       <main className="grid gap-4 p-4 md:grid-cols-2">
-        {/* First Row */}
         <Card>
           <CardHeader>
             <CardTitle>Simple Bar CHart</CardTitle>
@@ -27,7 +26,6 @@ export default function HomePage() {
           <CardContent className="h-96">
             <BarChartExample />
           </CardContent>
-          <CardFooter>{}</CardFooter>
         </Card>
 
         <Card>
@@ -39,7 +37,6 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        {/* Second Row - Full Width */}
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Sine Waves</CardTitle>
