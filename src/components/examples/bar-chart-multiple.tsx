@@ -79,7 +79,7 @@ const options = {
     {
       stroke: "var(--muted-foreground)",
       grid: { stroke: "hsl(var(--border)/50%)" },
-      size: 1,
+      size: 30,
       gap: 0,
     },
   ],

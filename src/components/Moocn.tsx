@@ -363,7 +363,7 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
           setTooltipSize({ width: rect.width, height: rect.height });
         }
       }
-    }, [cursorState]);
+    }, [cursorState, tooltipSize]);
 
     const hoveredIdx = cursorState.idx;
     const cursorLeft = cursorState.left;
@@ -405,23 +405,43 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
       cursorLeft !== null &&
       cursorTop !== null;
 
+    // If not hovering or no items, don't render
     if (!active || items.length === 0) {
       return null;
     }
 
     const { width: tw, height: th } = tooltipSize;
-    const padding = 16;
-    let tooltipLeft = cursorLeft + tw / 4 + padding;
-    let tooltipTop = cursorTop + th / 4 + padding;
+    let tooltipLeft = cursorLeft;
+    let tooltipTop = cursorTop;
+
     if (collisionAvoidance && chart) {
-      const rect = chart.bbox;
-      const chartWidth = rect.width + rect.left;
-      const chartHeight = rect.height + rect.top;
-      if (tooltipLeft + tw > chartWidth) {
-        tooltipLeft = chartWidth - tw;
+      const axes = chart.axes;
+      const axisXSize = axes?.[0]?.size() ?? 0;
+      const axisYSize = axes?.[1]?.size() ?? 0;
+
+      const PAD = 4;
+      tooltipLeft += axisYSize + PAD * 3;
+      tooltipTop += axisXSize + PAD * 2;
+
+      const {
+        left: chartX,
+        top: chartY,
+        width: chartW,
+        height: chartH,
+      } = chart.bbox;
+
+      if (tooltipLeft + tw > chartX + chartW) {
+        tooltipLeft = chartX + chartW - tw - PAD;
       }
-      if (tooltipTop + th > chartHeight) {
-        tooltipTop = chartHeight - th;
+      if (tooltipLeft < chartX) {
+        tooltipLeft = chartX + PAD;
+      }
+
+      if (tooltipTop + th > chartY + chartH) {
+        tooltipTop = chartY + chartH - th - PAD;
+      }
+      if (tooltipTop < chartY) {
+        tooltipTop = chartY + PAD;
       }
     }
 
