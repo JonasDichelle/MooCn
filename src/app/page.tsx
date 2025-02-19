@@ -18,10 +18,11 @@ export default function HomePage() {
         <ModeToggle />
       </header>
 
-      <main className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+      <main className="grid gap-4 p-4 md:grid-cols-2">
+        {/* First Row */}
         <Card>
           <CardHeader>
-            <CardTitle>Chart 1</CardTitle>
+            <CardTitle>Simple Bar CHart</CardTitle>
           </CardHeader>
           <CardContent className="h-96">
             <BarChartExample />
@@ -31,16 +32,17 @@ export default function HomePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Chart 2</CardTitle>
+            <CardTitle>Gradient Area Chart</CardTitle>
           </CardHeader>
           <CardContent className="h-96">
             <SimpleAreaChart />
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Second Row - Full Width */}
+        <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Chart 3</CardTitle>
+            <CardTitle>Sine Waves</CardTitle>
           </CardHeader>
           <CardContent className="h-96">
             <SineStreamChart />

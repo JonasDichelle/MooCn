@@ -183,15 +183,32 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
       return cloneAndResolveColors(options);
     }, [options, isDarkMode]);
 
+    const { handleChartCreate, handleSetCursor } =
+      React.useContext(MoocnContext);
+
     const finalOptions = React.useMemo(() => {
+      const existingHooks = colorResolvedOpts.hooks ?? {};
+      const mergedHooks = {
+        ...existingHooks,
+        setCursor: [
+          ...(existingHooks.setCursor || []),
+          (u: uPlot) => {
+            handleSetCursor?.(
+              u.cursor.idx ?? null,
+              u.cursor.left ?? null,
+              u.cursor.top ?? null
+            );
+          },
+        ],
+      };
       return {
         ...colorResolvedOpts,
         width: chartWidth,
         height: chartHeight,
-      };
-    }, [colorResolvedOpts, chartWidth, chartHeight]);
+        hooks: mergedHooks,
+      } as uPlot.Options;
+    }, [colorResolvedOpts, chartWidth, chartHeight, handleSetCursor]);
 
-    const { handleChartCreate } = React.useContext(MoocnContext);
     const onCreate = React.useCallback(
       (chartInstance: uPlot) => {
         handleChartCreate?.(chartInstance);
@@ -232,6 +249,11 @@ export interface MoocnContextValue {
     top: number | null;
   };
   handleChartCreate?: (chart: uPlot) => void;
+  handleSetCursor?: (
+    idx: number | null,
+    left: number | null,
+    top: number | null
+  ) => void;
 }
 
 export const MoocnContext = React.createContext<MoocnContextValue>({
@@ -249,26 +271,23 @@ export function MoocnProvider({ children }: { children: React.ReactNode }) {
 
   const handleChartCreate = React.useCallback((uplotInstance: uPlot) => {
     setChart(uplotInstance);
-
-    const handleMouseMove = () => {
-      setCursorState({
-        idx: uplotInstance.cursor.idx ?? null,
-        left: uplotInstance.cursor.left ?? null,
-        top: uplotInstance.cursor.top ?? null,
-      });
-    };
-    uplotInstance.root.addEventListener("mousemove", handleMouseMove);
   }, []);
 
-  React.useEffect(() => {}, [cursorState]);
+  const handleSetCursor = React.useCallback(
+    (idx: number | null, left: number | null, top: number | null) => {
+      setCursorState({ idx, left, top });
+    },
+    []
+  );
 
   const ctxValue = React.useMemo(
     () => ({
       chart,
       cursorState,
       handleChartCreate,
+      handleSetCursor,
     }),
-    [chart, handleChartCreate, cursorState]
+    [chart, cursorState, handleChartCreate, handleSetCursor]
   );
 
   return (
@@ -391,8 +410,7 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
     }
 
     const { width: tw, height: th } = tooltipSize;
-    console.log("tooltipSize", tooltipSize);
-    const padding = 12;
+    const padding = 16;
     let tooltipLeft = cursorLeft + tw / 4 + padding;
     let tooltipTop = cursorTop + th / 4 + padding;
     if (collisionAvoidance && chart) {
