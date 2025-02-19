@@ -6,7 +6,7 @@ import {
   MoocnProvider,
   MoocnLegendContent,
   MoocnTooltip,
-} from "../Moocn";
+} from "@/registry/moocn/Moocn";
 
 import { seriesBarsPlugin } from "../plugins/seriesBarsPlugin.js";
 

@@ -8,7 +8,7 @@ import {
   MoocnProvider,
   MoocnTooltip,
   MoocnLegendContent,
-} from "../Moocn";
+} from "@/registry/moocn/Moocn";
 import { wheelZoomPlugin } from "../wheelZoomPlugin";
 
 const { bars } = uPlot.paths;

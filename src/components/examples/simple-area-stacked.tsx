@@ -9,7 +9,7 @@ import {
   createVerticalGradient,
   MoocnLegendContent,
   MoocnTooltip,
-} from "../Moocn";
+} from "@/registry/moocn/Moocn";
 import { wheelZoomPlugin } from "../wheelZoomPlugin";
 
 const { spline } = uPlot.paths;

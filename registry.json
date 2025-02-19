@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "MooCn",
+  "homepage": "https://github.com/JonasDichelle/MooCn",
+  "items": [
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "moocn",
+      "type": "registry:component",
+      "title": "MooCn",
+      "description": "A shadcn-style chart component built on uPlot.",
+      "author": "Jonas Dichelle <jonasdichelle@gmail.com>",
+      "categories": ["chart"],
+
+      "dependencies": ["uplot", "uplot-react"],
+      "files": [
+        {
+          "path": "src/registry/moocn/Moocn.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

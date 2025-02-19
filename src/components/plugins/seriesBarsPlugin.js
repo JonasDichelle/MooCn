@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { Quadtree, pointWithin } from "./lib/quadtree.js";
 import { distr, SPACE_BETWEEN } from "./lib/distr.js";
-import { computeCssColor } from "../Moocn";
+import { computeCssColor } from "@/registry/moocn/Moocn";
 
 export function seriesBarsPlugin(opts) {
   let pxRatio = 1;
