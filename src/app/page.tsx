@@ -1,6 +1,7 @@
 "use client";
 
-import BarChartExample from "@/components/examples/bar-chart-multiple";
+import BarChartExample from "@/components/examples/bar-chart-example";
+import MultiseriesBarchartExample from "@/components/examples/bar-chart-multiple";
 import SimpleAreaChart from "@/components/examples/simple-area-stacked";
 import SineStreamChart from "@/components/examples/sine-wave-stream";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export default function HomePage() {
             <CardTitle>Simple Bar Chart</CardTitle>
           </CardHeader>
           <CardContent className="h-96">
-            <BarChartExample />
+            <MultiseriesBarchartExample />
           </CardContent>
         </Card>
 
@@ -55,6 +56,14 @@ export default function HomePage() {
           </CardHeader>
           <CardContent className="h-96">
             <SineStreamChart />
+          </CardContent>
+        </Card>
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Sine Waves</CardTitle>
+          </CardHeader>
+          <CardContent className="h-96">
+            <BarChartExample />
           </CardContent>
         </Card>
       </main>

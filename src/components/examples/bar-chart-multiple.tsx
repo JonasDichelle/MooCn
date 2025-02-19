@@ -100,7 +100,7 @@ const options = {
   legend: { show: false },
 };
 
-export default function BarChartExample() {
+export default function MultiseriesBarchartExample() {
   return (
     <MoocnProvider>
       <div className="flex flex-col h-full">
