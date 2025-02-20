@@ -32,14 +32,6 @@
         {
           "path": "src/registry/lib/moocn-bars.js",
           "type": "registry:lib"
-        },
-        {
-          "path": "src/registry/lib/distr.js",
-          "type": "registry:lib"
-        },
-        {
-          "path": "src/registry/lib/quadtree.js",
-          "type": "registry:lib"
         }
       ]
     }
