@@ -3,14 +3,11 @@
 import React from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
-import {
-  Moocn,
-  MoocnProvider,
-  createVerticalGradient,
-  MoocnLegendContent,
-  MoocnTooltip,
-} from "@/registry/moocn/Moocn";
-import { wheelZoomPlugin } from "../wheelZoomPlugin";
+import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import { MoocnLegend } from "@/registry/components/MoocnLegend";
+import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
+import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom-plugin";
+import { createVerticalGradient } from "@/registry/lib/moocn-utils";
 
 const { spline } = uPlot.paths;
 
@@ -118,7 +115,7 @@ export default function SimpleAreaChart() {
       <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={uPlotData} options={options} className="h-full w-full" />
-        <MoocnLegendContent />
+        <MoocnLegend />
       </div>
     </MoocnProvider>
   );

@@ -3,13 +3,10 @@
 import React from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
-import {
-  Moocn,
-  MoocnProvider,
-  MoocnTooltip,
-  MoocnLegendContent,
-} from "@/registry/moocn/Moocn";
-import { wheelZoomPlugin } from "../wheelZoomPlugin";
+import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import { MoocnLegend } from "@/registry/components/MoocnLegend";
+import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
+import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom-plugin";
 
 const { bars } = uPlot.paths;
 
@@ -66,7 +63,7 @@ export default function BarChartExample() {
       <div className="flex h-full flex-col">
         <MoocnTooltip />
         <Moocn data={uPlotData} options={options} className="h-full w-full" />
-        <MoocnLegendContent />
+        <MoocnLegend />
       </div>
     </MoocnProvider>
   );

@@ -1,13 +1,10 @@
 "use client";
 
 import * as React from "react";
-import {
-  Moocn,
-  MoocnProvider,
-  createVerticalGradient,
-  MoocnLegendContent,
-  MoocnTooltip,
-} from "@/registry/moocn/Moocn";
+import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import { MoocnLegend } from "@/registry/components/MoocnLegend";
+import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
+import { createVerticalGradient } from "@/registry/lib/moocn-utils";
 
 function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
@@ -227,7 +224,7 @@ export default function SineStreamChart() {
       <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={chartData} options={options} className="h-full w-full" />
-        <MoocnLegendContent />
+        <MoocnLegend />
       </div>
     </MoocnProvider>
   );

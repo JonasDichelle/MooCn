@@ -27,7 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/plugins/seriesBarsPlugin.js"
+    "src/registry/lib/moocn-bars-plugin.js"
   ],
   "exclude": ["node_modules"]
 }

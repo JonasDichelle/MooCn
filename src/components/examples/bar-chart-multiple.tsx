@@ -1,14 +1,11 @@
 "use client";
 
 import React from "react";
-import {
-  Moocn,
-  MoocnProvider,
-  MoocnLegendContent,
-  MoocnTooltip,
-} from "@/registry/moocn/Moocn";
+import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import { MoocnLegend } from "@/registry/components/MoocnLegend";
+import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
 
-import { seriesBarsPlugin } from "../plugins/seriesBarsPlugin.js";
+import { seriesBarsPlugin } from "@/registry/lib/moocn-bars-plugin";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -106,7 +103,7 @@ export default function MultiseriesBarchartExample() {
       <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={data} options={options} className="h-full w-full" />
-        <MoocnLegendContent />
+        <MoocnLegend />
       </div>
     </MoocnProvider>
   );

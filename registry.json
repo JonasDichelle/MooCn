@@ -15,8 +15,31 @@
       "dependencies": ["uplot", "uplot-react"],
       "files": [
         {
-          "path": "src/registry/moocn/Moocn.tsx",
+          "path": "src/registry/components/Moocn.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "moocn-bars",
+      "type": "registry:component",
+      "title": "MooCn Bar Charts",
+      "description": "A plugin for MooCn that adds additional support for bar charts.",
+      "author": "Jonas Dichelle <jonasdichelle@gmail.com>",
+      "categories": ["chart"],
+      "files": [
+        {
+          "path": "src/registry/lib/moocn-bars-plugin.js",
+          "type": "registry:lib"
+        },
+        {
+          "path": "src/registry/lib/distr.js",
+          "type": "registry:lib"
+        },
+        {
+          "path": "src/registry/lib/quadtree.js",
+          "type": "registry:lib"
         }
       ]
     }
