@@ -4,8 +4,7 @@ import React from "react";
 import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
-
-import { seriesBarsPlugin } from "@/registry/lib/moocn-bars-plugin";
+import { seriesBarsPlugin } from "@/registry/lib/moocn-bars";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },

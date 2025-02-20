@@ -30,7 +30,7 @@
       "categories": ["chart"],
       "files": [
         {
-          "path": "src/registry/lib/moocn-bars-plugin.js",
+          "path": "src/registry/lib/moocn-bars.js",
           "type": "registry:lib"
         },
         {

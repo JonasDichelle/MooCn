@@ -6,7 +6,7 @@ import "uplot/dist/uPlot.min.css";
 import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
-import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom-plugin";
+import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
 import { createVerticalGradient } from "@/registry/lib/moocn-utils";
 
 const { spline } = uPlot.paths;
