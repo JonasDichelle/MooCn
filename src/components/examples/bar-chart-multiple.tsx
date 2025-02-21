@@ -4,7 +4,7 @@ import React from "react";
 import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
-import { seriesBarsPlugin } from "@/registry/lib/moocn-bars";
+import { multiBarPlugin } from "@/registry/lib/moocn-multi-bars";
 import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
 
 const chartData = [
@@ -146,11 +146,11 @@ const chartConfig = {
   s3: { label: "Series 3", color: "hsl(var(--chart-3))" },
   s4: { label: "Series 4", color: "hsl(var(--chart-4))" },
   s5: { label: "Series 5", color: "hsl(var(--chart-5))" },
-  s6: { label: "Series 6", color: "hsl(var(--chart-6))" },
-  s7: { label: "Series 7", color: "hsl(var(--chart-7))" },
-  s8: { label: "Series 8", color: "hsl(var(--chart-8))" },
-  s9: { label: "Series 9", color: "hsl(var(--chart-9))" },
-  s10: { label: "Series 10", color: "hsl(var(--chart-10))" },
+  s6: { label: "Series 6", color: "hsl(var(--chart-1))" },
+  s7: { label: "Series 7", color: "hsl(var(--chart-2))" },
+  s8: { label: "Series 8", color: "hsl(var(--chart-3))" },
+  s9: { label: "Series 9", color: "hsl(var(--chart-4))" },
+  s10: { label: "Series 10", color: "hsl(var(--chart-5))" },
 } as const;
 
 const xVals = chartData.map((_, i) => i);
@@ -163,19 +163,19 @@ const data = [xVals, ...seriesVals];
 const options: uPlot.Options = {
   scales: {
     y: {
-      range: (u, min, max) => [0, max],
+      range: (u, min, max) => [0, 1000],
     },
     x: { time: false },
   },
   plugins: [
-    seriesBarsPlugin({
+    multiBarPlugin({
       ori: 0,
       dir: 1,
       stacked: true,
       ignore: [],
       radius: 0.1,
       groupWidth: 0.9,
-      barWidth: 0.5,
+      barWidth: 0.7,
       valueColor: "var(--muted-foreground)",
       showValues: true,
       xAxisStroke: "hsl(var(--foreground)/50%)",
@@ -224,7 +224,7 @@ export default function MultiseriesBarchartExample() {
       <div className="flex flex-col h-full">
         <MoocnTooltip />
         <Moocn data={data} options={options} className="h-full w-full" />
-        {}
+        <MoocnLegend />
       </div>
     </MoocnProvider>
   );
