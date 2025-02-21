@@ -1,214 +1,124 @@
 import uPlot from "uplot";
 import { computeCssColor } from "@/registry/lib/moocn-utils";
 
-function roundDec(val: number, dec: number): number {
-  const factor = 10 ** dec;
-  return Math.round(val * factor) / factor;
-}
-
-export const SPACE_BETWEEN = 1;
-export const SPACE_AROUND = 2;
-export const SPACE_EVENLY = 3;
-
-export function distr(
-  numItems: number,
-  sizeFactor: number,
-  justify: number,
-  onlyIdx: number | null,
-  each: (idx: number, offset: number, size: number) => void
-): void {
-  const space = 1 - sizeFactor;
-
-  let gap =
-    justify === SPACE_BETWEEN
-      ? space / (numItems - 1)
-      : justify === SPACE_AROUND
-      ? space / numItems
-      : justify === SPACE_EVENLY
-      ? space / (numItems + 1)
-      : 0;
-
-  if (isNaN(gap) || gap === Infinity) {
-    gap = 0;
-  }
-
-  let offs =
-    justify === SPACE_BETWEEN
-      ? 0
-      : justify === SPACE_AROUND
-      ? gap / 2
-      : justify === SPACE_EVENLY
-      ? gap
-      : 0;
-
-  const iwid = sizeFactor / numItems;
-  const _iwid = roundDec(iwid, 6);
-
-  function coord(i: number, offs: number, iwid: number, gap: number) {
-    return roundDec(offs + i * (iwid + gap), 6);
-  }
-
-  if (onlyIdx == null) {
-    for (let i = 0; i < numItems; i++) {
-      each(i, coord(i, offs, iwid, gap), _iwid);
-    }
-  } else {
-    each(onlyIdx, coord(onlyIdx, offs, iwid, gap), _iwid);
-  }
-}
-
-export function pointWithin(
-  px: number,
-  py: number,
-  rlft: number,
-  rtop: number,
-  rrgt: number,
-  rbtm: number
-): boolean {
-  return px >= rlft && px <= rrgt && py >= rtop && py <= rbtm;
-}
-
-const MAX_OBJECTS = 10;
-const MAX_LEVELS = 4;
-
-export interface QuadObj {
+interface QuadObj {
   x: number;
   y: number;
   w: number;
   h: number;
-  sidx?: number;
-  didx?: number;
+  sidx: number;
+  didx: number;
 }
 
 export class Quadtree {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  l: number;
-  o: QuadObj[];
-  q: Quadtree[] | null;
+  objs: QuadObj[] = [];
+  constructor(
+    public x: number,
+    public y: number,
+    public w: number,
+    public h: number
+  ) {}
 
-  constructor(x: number, y: number, w: number, h: number, l?: number) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.l = l || 0;
-    this.o = [];
-    this.q = null;
+  clear() {
+    this.objs.length = 0;
   }
 
-  split(): void {
-    const x = this.x;
-    const y = this.y;
-    const w = this.w / 2;
-    const h = this.h / 2;
-    const l = this.l + 1;
-
-    this.q = [
-      new Quadtree(x + w, y, w, h, l),
-      new Quadtree(x, y, w, h, l),
-      new Quadtree(x, y + h, w, h, l),
-      new Quadtree(x + w, y + h, w, h, l),
-    ];
+  add(o: QuadObj) {
+    this.objs.push(o);
   }
 
-  quads(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    cb: (quad: Quadtree) => void
-  ): void {
-    if (!this.q) return;
-
-    const hzMid = this.x + this.w / 2;
-    const vtMid = this.y + this.h / 2;
-    const startIsNorth = y < vtMid;
-    const startIsWest = x < hzMid;
-    const endIsEast = x + w > hzMid;
-    const endIsSouth = y + h > vtMid;
-
-    startIsNorth && endIsEast && cb(this.q[0]);
-    startIsNorth && startIsWest && cb(this.q[1]);
-    startIsWest && endIsSouth && cb(this.q[2]);
-    endIsEast && endIsSouth && cb(this.q[3]);
-  }
-
-  add(o: QuadObj): void {
-    if (this.q) {
-      this.quads(o.x, o.y, o.w, o.h, (quad) => {
-        quad.add(o);
-      });
-    } else {
-      this.o.push(o);
-      if (this.o.length > MAX_OBJECTS && this.l < MAX_LEVELS) {
-        this.split();
-        this.o.forEach((obj) => {
-          this.quads(obj.x, obj.y, obj.w, obj.h, (quad) => {
-            quad.add(obj);
-          });
-        });
-        this.o.length = 0;
+  get(px: number, py: number, cb: (o: QuadObj) => void) {
+    for (const o of this.objs) {
+      const l = o.x,
+        r = o.x + o.w,
+        t = o.y,
+        b = o.y + o.h;
+      if (px >= l && px <= r && py >= t && py <= b) {
+        cb(o);
       }
     }
   }
-
-  get(x: number, y: number, w: number, h: number, cb: (obj: QuadObj) => void) {
-    for (let i = 0; i < this.o.length; i++) {
-      cb(this.o[i]);
-    }
-    if (this.q) {
-      this.quads(x, y, w, h, (quad) => {
-        quad.get(x, y, w, h, cb);
-      });
-    }
-  }
-
-  clear(): void {
-    this.o.length = 0;
-    this.q = null;
-  }
 }
+
+interface BarPixelGeom {
+  centerX: number;
+  topY: number;
+  botY: number;
+}
+
+type BarPixelGeomStore = Array<Array<BarPixelGeom | null>>;
 
 export interface SeriesBarsPluginOpts {
   ignore?: number[];
   radius?: number;
-  ori?: 0 | 1;
-  dir?: 1 | -1;
-  stacked?: boolean;
-  disp?: Record<string, any>;
   groupWidth?: number;
   barWidth?: number;
   showValues?: boolean;
   valueColor?: string;
+  stacked?: boolean;
 }
 
-export function seriesBarsPlugin(opts: SeriesBarsPluginOpts): uPlot.Plugin {
-  let pxRatio = 1;
-  let font = "10px Arial";
+interface BarDomainLayout {
+  x0: number[];
+  size: number[];
+}
 
+function buildBarDomainLayouts(
+  xVals: number[],
+  barCount: number,
+  groupWidth: number,
+  barWidth: number
+): BarDomainLayout[] {
+  if (barCount === 0 || xVals.length === 0) return [];
+
+  let avgGap = 1;
+  if (xVals.length > 1) {
+    let totalGap = 0;
+    for (let i = 1; i < xVals.length; i++) {
+      totalGap += xVals[i] - xVals[i - 1];
+    }
+    avgGap = totalGap / (xVals.length - 1);
+  }
+
+  const clusterWidth = avgGap * groupWidth;
+  const rawShare = clusterWidth / barCount;
+  const usedShare = rawShare * barWidth;
+  const leftover = rawShare - usedShare;
+
+  const layouts: BarDomainLayout[] = [];
+  for (let b = 0; b < barCount; b++) {
+    const x0 = new Array<number>(xVals.length);
+    const size = new Array<number>(xVals.length).fill(usedShare);
+
+    for (let i = 0; i < xVals.length; i++) {
+      const center = xVals[i];
+      const clusterLeft = center - clusterWidth / 2;
+      x0[i] = clusterLeft + b * rawShare + leftover / 2;
+    }
+    layouts.push({ x0, size });
+  }
+  return layouts;
+}
+
+export function seriesBarsPlugin(
+  opts: SeriesBarsPluginOpts = {}
+): uPlot.Plugin {
   const {
     ignore = [],
     radius = 0,
-    ori = 0,
-    dir = 1,
-    stacked = false,
-    disp = {},
-    groupWidth = 1.0,
-    barWidth = 1.0,
+    groupWidth = 0.9,
+    barWidth = 0.9,
     showValues = false,
     valueColor = "black",
   } = opts;
 
-  let qt: Quadtree;
-  let hRect: QuadObj | null = null;
+  let pxRatio = 1;
+  let font = "10px Arial";
 
   function setPxRatio() {
     if (typeof window !== "undefined") {
       pxRatio = window.devicePixelRatio;
-      font = Math.round(10 * pxRatio) + "px Arial";
+      font = `${Math.round(10 * pxRatio)}px Arial`;
     }
   }
   setPxRatio();
@@ -217,262 +127,171 @@ export function seriesBarsPlugin(opts: SeriesBarsPluginOpts): uPlot.Plugin {
     window.addEventListener("dppxchange", setPxRatio);
   }
 
-  const groupDistr = SPACE_BETWEEN;
-  const barDistr = SPACE_BETWEEN;
+  let qt: Quadtree;
+  let barLayouts: Array<BarDomainLayout | null> = [];
 
-  function distrTwo(
-    groupCount: number,
-    barCount: number,
-    barSpread = true,
-    _groupWidth = groupWidth
-  ): Array<{ offs: number[]; size: number[] }> {
-    const out = Array.from({ length: barCount }, () => ({
-      offs: Array(groupCount).fill(0),
-      size: Array(groupCount).fill(0),
-    }));
-
-    distr(
-      groupCount,
-      _groupWidth,
-      groupDistr,
-      null,
-      (groupIdx, groupOffPct, groupDimPct) => {
-        distr(
-          barCount,
-          barWidth,
-          barDistr,
-          null,
-          (barIdx, barOffPct, barDimPct) => {
-            out[barIdx].offs[groupIdx] =
-              groupOffPct + (barSpread ? groupDimPct * barOffPct : 0);
-            out[barIdx].size[groupIdx] =
-              groupDimPct * (barSpread ? barDimPct : 1);
-          }
-        );
-      }
-    );
-
-    return out;
-  }
-
-  let barsPctLayout: Array<null | { offs: number[]; size: number[] }>;
+  let barPixelGeom: BarPixelGeomStore = [];
 
   const barsBuilder = uPlot.paths.bars({
     radius,
     disp: {
       x0: {
-        unit: 2,
-        values: (u: any, seriesIdx: number) => barsPctLayout[seriesIdx]?.offs,
+        unit: 1,
+        values: (self, sidx) => barLayouts[sidx]?.x0 ?? [],
       },
       size: {
-        unit: 2,
-        values: (u: any, seriesIdx: number) => barsPctLayout[seriesIdx]?.size,
+        unit: 1,
+        values: (self, sidx) => barLayouts[sidx]?.size ?? [],
       },
-      ...disp,
     },
 
-    each: (
-      u: any,
-      seriesIdx: number,
-      dataIdx: number,
-      lft: number,
-      top: number,
-      wid: number,
-      hgt: number
-    ) => {
-      lft -= u.bbox.left;
-      top -= u.bbox.top;
-      qt.add({
-        x: lft,
-        y: top,
-        w: wid,
-        h: hgt,
-        sidx: seriesIdx,
-        didx: dataIdx,
-      });
+    each(self, sidx, didx, left, top, width, height) {
+      const plotLeft = left - self.bbox.left;
+      const plotTop = top - self.bbox.top;
+
+      qt.add({ x: plotLeft, y: plotTop, w: width, h: height, sidx, didx });
+
+      if (!barPixelGeom[sidx]) {
+        barPixelGeom[sidx] = [];
+      }
+
+      const centerX = plotLeft + width / 2;
+      const bot = plotTop + height;
+
+      barPixelGeom[sidx][didx] = {
+        centerX,
+        topY: plotTop,
+        botY: bot,
+      };
     },
   });
 
-  function drawPoints(u: any, sidx: number) {
+  function drawValues(u: uPlot, sidx: number) {
     if (!showValues) return;
 
     const ctx = u.ctx;
     ctx.save();
-
     ctx.font = font;
     ctx.fillStyle = computeCssColor(valueColor);
 
-    uPlot.orient(
-      u,
-      sidx,
-      (
-        _series: any,
-        dataX: number[],
-        dataY: number[],
-        scaleX: any,
-        scaleY: any,
-        valToPosX: (
-          val: number,
-          scaleKey: any,
-          dim: number,
-          off: number
-        ) => number,
-        valToPosY: (
-          val: number,
-          scaleKey: any,
-          dim: number,
-          off: number
-        ) => number,
-        xOff: number,
-        yOff: number,
-        xDim: number,
-        yDim: number
-      ) => {
-        const _dir = dir * (ori === 0 ? 1 : -1);
+    const xs = u.data[0];
+    const ys = u.data[sidx];
 
-        const widPx = Math.round((barsPctLayout[sidx]?.size[0] ?? 0) * xDim);
+    const axisXSize = u.axes?.[0]?.size() ?? 0;
+    const axisYSize = u.axes?.[1]?.size() ?? 0;
 
-        barsPctLayout[sidx]?.offs.forEach((offs, ix) => {
-          const val = dataY[ix];
-          if (val != null) {
-            const x0 = xDim * offs;
-            const lft = Math.round(
-              xOff + (_dir === 1 ? x0 : xDim - x0 - widPx)
-            );
-            const barWid = Math.round(widPx);
+    for (let i = 0; i < (xs?.length ?? 0); i++) {
+      const val = ys[i];
+      if (val == null) continue;
 
-            const yPos = valToPosY(val, scaleY, yDim, yOff);
-            const xPos =
-              ori === 0 ? Math.round(lft + barWid / 2) : Math.round(yPos);
-            const yPos2 =
-              ori === 0 ? Math.round(yPos) : Math.round(lft + barWid / 2);
+      const geom = barPixelGeom[sidx]?.[i];
+      if (!geom) continue;
 
-            ctx.textAlign = ori === 0 ? "center" : val >= 0 ? "left" : "right";
-            ctx.textBaseline =
-              ori === 1 ? "middle" : val >= 0 ? "bottom" : "top";
+      const isPos = val >= 0;
 
-            ctx.fillText(val, xPos, yPos2);
-          }
-        });
-      }
-    );
+      const barTop = isPos ? geom.topY : geom.botY;
+
+      const valStr = String(val);
+      const metrics = ctx.measureText(valStr);
+
+      const asc = metrics.actualBoundingBoxAscent || 8;
+      const desc = metrics.actualBoundingBoxDescent || 2;
+      const textH = asc + desc;
+
+      const PAD = 10;
+
+      const labelX = geom.centerX + axisYSize;
+      const labelY = barTop + axisXSize;
+
+      const labelShift = isPos ? -(textH + PAD) : textH + PAD;
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = isPos ? "bottom" : "top";
+
+      ctx.fillText(valStr, Math.round(labelX), Math.round(labelY + labelShift));
+    }
 
     ctx.restore();
   }
 
   return {
     hooks: {
-      drawClear: (u: any) => {
+      drawClear(u) {
         qt = qt || new Quadtree(0, 0, u.bbox.width, u.bbox.height);
         qt.clear();
 
-        u.series.forEach((s: any) => {
+        for (const s of u.series) {
           s._paths = null;
-        });
+        }
 
-        const groupCount = u.data[0].length;
-        const barCount = u.series.length - 1 - ignore.length;
+        barPixelGeom = [];
 
-        barsPctLayout = [null].concat(
-          distrTwo(groupCount, barCount, !stacked, groupWidth)
+        const barSeriesIdxs: number[] = [];
+        for (let i = 1; i < u.series.length; i++) {
+          if (!ignore.includes(i)) barSeriesIdxs.push(i);
+        }
+
+        const xVals = (u.data[0] ?? []) as number[];
+        const barCount = barSeriesIdxs.length;
+        const layouts = buildBarDomainLayouts(
+          xVals,
+          barCount,
+          groupWidth,
+          barWidth
         );
+
+        barLayouts = [null];
+        let b = 0;
+        for (let i = 1; i < u.series.length; i++) {
+          if (ignore.includes(i)) {
+            barLayouts.push(null);
+          } else {
+            barLayouts.push(layouts[b]);
+            b++;
+          }
+        }
       },
     },
 
-    opts: (u: any, optsObj: any) => {
-      optsObj.axes = optsObj.axes || [];
-
-      if (!optsObj.axes[0]) {
-        optsObj.axes[0] = {};
-      }
-
-      uPlot.assign(optsObj, {
-        select: { show: false },
+    opts(u, optsObj) {
+      Object.assign(optsObj, {
+        select: { show: true },
         cursor: {
-          drag: {
-            x: true,
-            y: true,
-          },
-          x: false,
-          y: false,
-          dataIdx: (u2: any, seriesIdx: number) => {
-            if (seriesIdx === 1) {
-              hRect = null;
-              const cx = u2.cursor.left * pxRatio;
-              const cy = u2.cursor.top * pxRatio;
+          drag: { x: true, y: true },
 
-              qt.get(cx, cy, 1, 1, (o) => {
-                if (pointWithin(cx, cy, o.x, o.y, o.x + o.w, o.y + o.h)) {
-                  hRect = o;
-                }
-              });
-            }
-            return hRect && seriesIdx === hRect.sidx ? hRect.didx : null;
-          },
+          dataIdx: () => null,
           points: {
             fill: "rgba(255,255,255,0.25)",
-            bbox: (_u2: any, seriesIdx: number) => {
-              const isHovered = hRect && seriesIdx === hRect.sidx;
-              if (!isHovered) {
+            bbox: (_chart: any, sidx: number) => {
+              if (sidx === 0 || ignore.includes(sidx)) {
                 return { left: -10, top: -10, width: 0, height: 0 };
               }
+              const cx = _chart.cursor.left * pxRatio;
+              const cy = _chart.cursor.top * pxRatio;
+              let hovered: QuadObj | null = null;
+              qt.get(cx, cy, (o) => {
+                if (o.sidx === sidx) {
+                  hovered = o;
+                }
+              });
+              if (!hovered) return { left: -10, top: -10, width: 0, height: 0 };
               return {
-                left: hRect.x / pxRatio,
-                top: hRect.y / pxRatio,
-                width: hRect.w / pxRatio,
-                height: hRect.h / pxRatio,
+                left: hovered.x / pxRatio,
+                top: hovered.y / pxRatio,
+                width: hovered.w / pxRatio,
+                height: hovered.h / pxRatio,
               };
             },
           },
         },
-        scales: {
-          x: {
-            time: false,
-            distr: 2,
-            ori,
-            dir,
-            range: (u3: any, min: number, max: number) => {
-              min = 0;
-              max = Math.max(1, u3.data[0].length - 1);
-
-              let pctOffset = 0;
-              distr(
-                u3.data[0].length,
-                groupWidth,
-                groupDistr,
-                0,
-                (_di, lftPct, widPct) => {
-                  pctOffset = lftPct + widPct / 2;
-                }
-              );
-
-              const rn = max - min;
-
-              if (pctOffset === 0.5) {
-                min -= rn;
-              } else {
-                const upScale = 1 / (1 - pctOffset * 2);
-                const offset = (upScale * rn - rn) / 2;
-                min -= offset;
-                max += offset;
-              }
-
-              return [min, max];
-            },
-          },
-        },
       });
 
-      optsObj.series.forEach((s: any, i: number) => {
-        if (i > 0 && !ignore.includes(i)) {
-          uPlot.assign(s, {
-            paths: barsBuilder,
-            points: {
-              show: showValues ? drawPoints : false,
-            },
-          });
-        }
-      });
+      for (let i = 1; i < optsObj.series.length; i++) {
+        if (ignore.includes(i)) continue;
+        const s = optsObj.series[i];
+        s.paths = barsBuilder;
+        s.points = { show: showValues ? drawValues : false };
+      }
     },
-  } as uPlot.Plugin;
+  };
 }
