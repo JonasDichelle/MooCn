@@ -23,6 +23,10 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
     const [chartWidth, setChartWidth] = React.useState(options.width ?? 0);
     const [chartHeight, setChartHeight] = React.useState(options.height ?? 0);
 
+    const typedData = data.map(
+      (arr) => new Float64Array(arr.map((val) => (val === null ? NaN : val)))
+    );
+
     React.useLayoutEffect(() => {
       const element = containerRef.current;
       if (!element) return;
@@ -87,11 +91,8 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
             }}
           >
             <UplotReact
-              style={{
-                visibility: hasMeasured ? "visible" : "hidden",
-              }}
               options={finalOptions}
-              data={data}
+              data={typedData}
               onCreate={onCreate}
             />
           </div>

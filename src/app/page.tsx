@@ -31,16 +31,16 @@ export default function HomePage() {
         </div>
       </header>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Simple Bar Chart</CardTitle>
+        </CardHeader>
+        <CardContent className="h-96">
+          <MultiseriesBarchartExample />
+        </CardContent>
+      </Card>
       <main className="grid gap-4 p-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Simple Bar Chart</CardTitle>
-          </CardHeader>
-          <CardContent className="h-96">
-            <MultiseriesBarchartExample />
-          </CardContent>
-        </Card>
-
+        {/* 
         <Card>
           <CardHeader>
             <CardTitle>Gradient Area Chart</CardTitle>
@@ -65,7 +65,7 @@ export default function HomePage() {
           <CardContent className="h-96">
             <BarChartExample />
           </CardContent>
-        </Card>
+        </Card> */}
       </main>
     </div>
   );

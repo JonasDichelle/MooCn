@@ -101,7 +101,7 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
 
               u.batch(() => {
                 u.setScale("x", { min: nxMin, max: nxMax });
-                u.setScale("y", { min: nyMin, max: nyMax });
+                // u.setScale("y", { min: nyMin, max: nyMax });
               });
             }
 

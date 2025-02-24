@@ -125,10 +125,12 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
 
     if (collisionAvoidance && chart) {
       const axes = chart.axes;
-      const axisXSize = axes?.[0]?.size() ?? 0;
-      const axisYSize = axes?.[1]?.size() ?? 0;
+      //   const axisXSize = axes?.[0]?.size() ?? 0;
+      //   const axisYSize = axes?.[1]?.size() ?? 0;
+      const axisXSize = 0;
+      const axisYSize = 0;
 
-      const PAD = 4;
+      const PAD = 16;
       tooltipLeft += axisYSize + PAD * 3;
       tooltipTop += axisXSize + PAD * 2;
 
