@@ -17,12 +17,20 @@
         {
           "path": "src/registry/components/Moocn.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "src/registry/components/MoocnLegend.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/components/MoocnTooltip.tsx",
+          "type": "registry:component"
         }
       ]
     },
     {
       "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-      "name": "moocn-bars",
+      "name": "moocn-multi-bars",
       "type": "registry:component",
       "title": "MooCn Bar Charts",
       "description": "A plugin for MooCn that adds additional support for bar charts.",
@@ -30,7 +38,7 @@
       "categories": ["chart"],
       "files": [
         {
-          "path": "src/registry/lib/moocn-bars.ts",
+          "path": "src/registry/lib/moocn-multi-bars.ts",
           "type": "registry:lib"
         }
       ]

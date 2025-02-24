@@ -1,10 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import uPlot from "uplot";
+import "uplot/dist/uPlot.min.css";
+
+import {
+  Moocn,
+  MoocnOptions,
+  MoocnProvider,
+} from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
 import { createVerticalGradient } from "@/registry/lib/moocn-utils";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
@@ -58,11 +74,11 @@ function randomWalk(
   return points;
 }
 
-const options = {
+const options: MoocnOptions = {
   scales: {
     x: { time: false },
     y: {
-      range: [-6, 6],
+      range: () => [-6, 6],
     },
   },
   legend: { show: false },
@@ -87,91 +103,81 @@ const options = {
     {},
 
     {
-      label: "Sine",
+      label: "Moo Wave",
       stroke: "var(--chart-1)",
-      fill: (u: any, si: number) =>
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
           "hsl(var(--chart-1)/5%)",
           "var(--chart-1)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
 
     {
-      label: "Series 1",
+      label: "Herd 1",
       stroke: "var(--chart-2)",
-      fill: (u: any, si: number) =>
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
           "hsl(var(--chart-2)/5%)",
           "var(--chart-2)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
-
     {
-      label: "Series 2",
+      label: "Herd 2",
       stroke: "var(--chart-3)",
-      fill: (u: any, si: number) =>
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
           "hsl(var(--chart-3)/5%)",
           "var(--chart-3)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
-
     {
-      label: "Series 3",
+      label: "Herd 3",
       stroke: "var(--chart-4)",
-      fill: (u: any, si: number) =>
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
           "hsl(var(--chart-4)/5%)",
           "var(--chart-4)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
-
     {
-      label: "Series 4",
+      label: "Herd 4",
       stroke: "var(--chart-5)",
-      fill: (u: any, si: number) =>
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
           "hsl(var(--chart-5)/5%)",
           "var(--chart-5)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
-
     {
-      label: "Series 5",
-      stroke: "var(--chart-5)",
-      fill: (u: any, si: number) =>
+      label: "Herd 5",
+      stroke: "var(--chart-1)",
+      fill: (u, si) =>
         createVerticalGradient(
           u,
           si,
-          "hsl(var(--chart-5)/5%)",
+          "hsl(var(--chart-1)/5%)",
           "var(--chart-5)"
         ),
-      fillAlpha: 0.2,
       width: 2,
       points: { show: false },
     },
@@ -180,7 +186,9 @@ const options = {
 
 export default function SineStreamChart() {
   const length = 600;
+
   const [xs, setXs] = React.useState(Array.from({ length }, (_, i) => i));
+
   const [sine, setSine] = React.useState(
     Array.from({ length }, (_, i) => Math.sin(i / 16) * 5)
   );
@@ -194,20 +202,26 @@ export default function SineStreamChart() {
   React.useEffect(() => {
     let shift = length;
     let frameId: number;
+
     function update() {
       shift++;
+
       setXs((prev) => [...prev.slice(1), shift]);
+
       setSine((prev) => [...prev.slice(1), Math.sin(shift / 16) * 5]);
+
       setR1((prev) => addRandData(prev));
       setR2((prev) => addRandData(prev));
       setR3((prev) => addRandData(prev));
       setR4((prev) => addRandData(prev));
       setR5((prev) => addRandData(prev));
+
       frameId = requestAnimationFrame(update);
     }
 
     function addRandData(data: number[]): number[] {
       const lastVal = data[data.length - 1];
+
       return [...data.slice(1), randomWalk(1, lastVal, -6, 6)[0]];
     }
 
@@ -221,11 +235,24 @@ export default function SineStreamChart() {
 
   return (
     <MoocnProvider>
-      <div className="flex flex-col h-full">
-        <MoocnTooltip />
-        <Moocn data={chartData} options={options} className="h-full w-full" />
-        <MoocnLegend />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Cow Waves</CardTitle>
+          <CardDescription>Streaming Real-Time Herd Data</CardDescription>
+        </CardHeader>
+
+        <CardContent className="h-[400px] w-full">
+          <MoocnTooltip />
+          <Moocn data={chartData} options={options} className="h-full w-full" />
+          <MoocnLegend />
+        </CardContent>
+
+        <CardFooter>
+          <div className="text-sm text-muted-foreground">
+            Moo data continuously updated from the pasture.
+          </div>
+        </CardFooter>
+      </Card>
     </MoocnProvider>
   );
 }

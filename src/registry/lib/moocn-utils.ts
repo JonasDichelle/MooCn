@@ -1,4 +1,5 @@
 import React from "react";
+import { MoocnOptions } from "../components/Moocn";
 
 function expandCssVars(color: string, el: HTMLElement): string {
   const style = getComputedStyle(el);
@@ -99,7 +100,7 @@ export function createVerticalGradient(
   return gradient;
 }
 
-export function cloneAndResolveColors(options: UplotOptions): UplotOptions {
+export function cloneAndResolveColors(options: MoocnOptions): MoocnOptions {
   const newOptions = { ...options };
   if (Array.isArray(options.series)) {
     newOptions.series = options.series.map((seriesItem: any) => {

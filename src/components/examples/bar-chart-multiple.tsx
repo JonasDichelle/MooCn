@@ -1,7 +1,20 @@
 "use client";
 
 import React from "react";
-import { Moocn, MoocnProvider } from "@/registry/components/Moocn";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+
+import {
+  Moocn,
+  MoocnOptions,
+  MoocnProvider,
+} from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
 import { multiBarPlugin } from "@/registry/lib/moocn-multi-bars";
@@ -12,20 +25,15 @@ const DATA_COUNT = 10000;
 const SERIES_COUNT = 12;
 
 function generateData() {
-  console.log("generateData");
-
   const xVals = Array.from({ length: DATA_COUNT }, (_, i) => i);
-
   const seriesValues: number[][] = [];
   for (let s = 0; s < SERIES_COUNT; s++) {
     const vals = xVals.map((x) => {
       const noise = Math.random() * 20 - 10;
-
-      return Math.max(0, 50 + 50 * Math.sin((x + s * 10) / 15) + noise);
+      return Math.max(0, 50 + 50 * Math.sin((x * 0.1 + s * 10) / 15) + noise);
     });
     seriesValues.push(vals);
   }
-
   return {
     xVals,
     seriesValues,
@@ -33,25 +41,23 @@ function generateData() {
 }
 
 const { xVals, seriesValues } = generateData();
-
 const data = [xVals, ...seriesValues];
-
-const colors = Array.from({ length: SERIES_COUNT }, (_, i) => {
-  const hue = (i * 30) % 360;
-  return `hsl(${hue}, 70%, 50%)`;
-});
 
 const seriesConfig = [
   {},
-  ...colors.map((color, i) => ({
-    label: `Series ${i + 1}`,
-    stroke: color,
-    fill: color,
-  })),
+  ...Array.from({ length: SERIES_COUNT }, (_, i) => {
+    const colorIndex = (i % 5) + 1;
+    const color = `hsl(var(--chart-${colorIndex}))`;
+    return {
+      label: `Herd ${i + 1}`,
+      stroke: color,
+      fill: color,
+    };
+  }),
 ];
 
-const options: uPlot.Options = {
-  select: { show: true },
+const options: MoocnOptions = {
+  select: { show: false } as uPlot.Select,
   scales: {
     y: {
       range: (u, min, max) => [0, max],
@@ -60,8 +66,6 @@ const options: uPlot.Options = {
   },
   plugins: [
     multiBarPlugin({
-      ori: 0,
-      dir: 1,
       stacked: false,
       ignore: [],
       radius: 0.1,
@@ -69,9 +73,6 @@ const options: uPlot.Options = {
       barWidth: 0.9,
       valueColor: "var(--muted-foreground)",
       showValues: false,
-      xAxisStroke: "hsl(var(--foreground)/50%)",
-      yAxisStroke: "hsl(var(--foreground)/50%)",
-      cursorClassName: "rounded-none",
     }),
     wheelZoomPlugin({ factor: 0.75 }),
   ],
@@ -83,7 +84,7 @@ const options: uPlot.Options = {
       gap: 0,
       show: true,
       incrs: [1, 2, 5, 10, 30, 100, 300, 1000],
-      values: (u, ticks) => ticks.map((v) => "Day " + Math.floor(v)),
+      values: (u, ticks) => ticks.map((v) => "Pasture Day " + Math.floor(v)),
     },
     {
       stroke: "var(--muted-foreground)",
@@ -92,7 +93,6 @@ const options: uPlot.Options = {
       gap: 0,
     },
   ],
-
   series: seriesConfig,
   legend: { show: false },
 };
@@ -100,11 +100,25 @@ const options: uPlot.Options = {
 export default function ManySeriesBarchartExample() {
   return (
     <MoocnProvider>
-      <div className="flex flex-col h-full">
-        <MoocnTooltip />
-        <Moocn data={data} options={options} className="h-full w-full" />
-        <MoocnLegend />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>MooltiSeries Barchart</CardTitle>
+          <CardDescription>12 x 10,000 bars</CardDescription>
+        </CardHeader>
+
+        <CardContent className="h-[400px] w-full">
+          <MoocnTooltip />
+          <Moocn data={data} options={options} className="h-full w-full" />
+          <MoocnLegend />
+        </CardContent>
+
+        <CardFooter>
+          <div className="text-sm text-muted-foreground">
+            Each herd’s daily moo-surements shown over {DATA_COUNT} pasture
+            days.
+          </div>
+        </CardFooter>
+      </Card>
     </MoocnProvider>
   );
 }

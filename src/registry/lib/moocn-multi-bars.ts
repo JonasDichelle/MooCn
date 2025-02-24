@@ -66,6 +66,7 @@ class Quadtree {
     cb: (q: Quadtree) => void
   ) {
     if (!this.q) return;
+
     const hzMid = this.x + this.w / 2;
     const vtMid = this.y + this.h / 2;
 
@@ -104,6 +105,7 @@ class Quadtree {
     for (let i = 0; i < this.o.length; i++) {
       cb(this.o[i]);
     }
+
     if (this.q) {
       this.quads(x, y, w, h, (quad) => {
         quad.get(x, y, w, h, cb);
@@ -182,27 +184,33 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
 
   function buildSideBySideLayouts(xVals: number[], barCount: number) {
     if (barCount <= 0 || xVals.length === 0) return [];
+
     let totalGap = 0;
     for (let i = 1; i < xVals.length; i++) {
       totalGap += xVals[i] - xVals[i - 1];
     }
     const avgGap = xVals.length > 1 ? totalGap / (xVals.length - 1) : 1;
+
     const clusterWidth = avgGap * groupWidth;
     const rawShare = clusterWidth / barCount;
     const usedShare = rawShare * barWidth;
     const leftover = rawShare - usedShare;
 
     const layouts: BarDomainLayout[] = [];
+
     for (let b = 0; b < barCount; b++) {
       const x0 = new Array<number>(xVals.length);
       const size = new Array<number>(xVals.length).fill(usedShare);
+
       for (let i = 0; i < xVals.length; i++) {
         const center = xVals[i];
         const clusterLeft = center - clusterWidth / 2;
         x0[i] = clusterLeft + b * rawShare + leftover / 2;
       }
+
       layouts.push({ x0, size });
     }
+
     return layouts;
   }
 
@@ -218,15 +226,18 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
 
     const x0 = new Array<number>(xVals.length);
     const size = new Array<number>(xVals.length).fill(usedShare);
+
     for (let i = 0; i < xVals.length; i++) {
       const center = xVals[i];
       x0[i] = center - clusterWidth / 2 + leftover / 2;
     }
+
     return { x0, size };
   }
 
   function drawValues(u: uPlot, sidx: number) {
     if (!showValues) return;
+
     const ctx = u.ctx;
     ctx.save();
     ctx.font = font;
@@ -246,17 +257,20 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
     for (let i = 0; i < (xs?.length ?? 0); i++) {
       const val = ys[i];
       if (val == null) continue;
+
       const geom = barPixelGeom[sidx]?.[i];
       if (!geom) continue;
 
       const isPos = val >= 0;
       const barTop = isPos ? geom.topY : geom.botY;
+
       const valStr = String(val);
       const metrics = ctx.measureText(valStr);
       const asc = metrics.actualBoundingBoxAscent || 8;
       const desc = metrics.actualBoundingBoxDescent || 2;
       const textH = asc + desc;
       const PAD = 10;
+
       const labelX = geom.centerX + axisYSize;
       const labelY = barTop + axisXSize;
       const labelShift = isPos ? -(textH + PAD) : textH + PAD;
@@ -335,6 +349,34 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
     };
   }
 
+  function updateRadius(u: uPlot) {
+    let barWidthPx = 0;
+
+    for (let sidx = 1; sidx < u.series.length; sidx++) {
+      if (ignore.includes(sidx)) continue;
+      const layout = xLayouts[sidx];
+      if (layout && layout.x0.length > 0) {
+        const domainLeft = layout.x0[0];
+        const domainRight = domainLeft + layout.size[0];
+        const pxLeft = u.valToPos(domainLeft, "x", true);
+        const pxRight = u.valToPos(domainRight, "x", true);
+        barWidthPx = Math.abs(pxRight - pxLeft);
+        break;
+      }
+    }
+
+    const newRadius = barWidthPx > 2 ? userRadius : 0;
+    if (newRadius !== oldRadius) {
+      curRadius = newRadius;
+      oldRadius = newRadius;
+
+      for (let i = 0; i < u.series.length; i++) {
+        (u.series[i] as any)._paths = null;
+      }
+      u.redraw();
+    }
+  }
+
   return {
     hooks: {
       init(u) {
@@ -377,20 +419,20 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
           return;
         }
 
+        xLayouts = new Array(u.series.length).fill(null);
+        stackedYs = new Array(u.series.length).fill(null);
+
         if (stacked) {
           const layout = buildStackedLayout(xVals);
-          xLayouts = new Array(u.series.length).fill(null);
-          stackedYs = new Array(u.series.length).fill(null);
-
-          for (const i of barSeriesIdxs) {
-            xLayouts[i] = layout;
-          }
 
           const partialSums = xVals.map(() => 0);
-          for (const i of barSeriesIdxs) {
-            const dataY = u.data[i] as (number | null)[];
+          for (const sidx of barSeriesIdxs) {
+            xLayouts[sidx] = layout;
+
+            const dataY = u.data[sidx] as (number | null)[];
             const y0 = [];
             const y1 = [];
+
             for (let j = 0; j < dataY.length; j++) {
               const val = dataY[j] ?? 0;
               y0[j] = partialSums[j];
@@ -399,28 +441,20 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
             for (let j = 0; j < dataY.length; j++) {
               partialSums[j] = y1[j];
             }
-            stackedYs[i] = { y0, y1 };
+
+            stackedYs[sidx] = { y0, y1 };
           }
         } else {
           const barCount = barSeriesIdxs.length;
           const layouts = buildSideBySideLayouts(xVals, barCount);
-          xLayouts = [];
-          stackedYs = [];
-          let layoutIndex = 0;
 
-          for (let i = 1; i < u.series.length; i++) {
-            if (ignore.includes(i)) {
-              xLayouts.push(null);
-              stackedYs.push(null);
-              continue;
-            }
-            xLayouts.push(layouts[layoutIndex++]);
-            stackedYs.push(null);
+          let layoutIndex = 0;
+          for (const sidx of barSeriesIdxs) {
+            xLayouts[sidx] = layouts[layoutIndex++];
           }
 
-          for (let i = 1; i < u.series.length; i++) {
-            if (ignore.includes(i)) continue;
-            const dataY = u.data[i] as (number | null)[];
+          for (const sidx of barSeriesIdxs) {
+            const dataY = u.data[sidx] as (number | null)[];
             const y0 = [];
             const y1 = [];
             for (let j = 0; j < dataY.length; j++) {
@@ -428,37 +462,16 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
               y0[j] = 0;
               y1[j] = val;
             }
-            stackedYs[i] = { y0, y1 };
+            stackedYs[sidx] = { y0, y1 };
           }
         }
+
+        updateRadius(u);
       },
 
       setScale(u, scaleKey) {
         if (scaleKey !== "x" && scaleKey !== "y") return;
-
-        let barWidthPx = 0;
-        for (let sidx = 1; sidx < u.series.length; sidx++) {
-          if (ignore.includes(sidx)) continue;
-          const layout = xLayouts[sidx];
-          if (layout && layout.x0.length > 1) {
-            const domainLeft = layout.x0[0];
-            const domainRight = layout.x0[0] + layout.size[0];
-            const pxLeft = u.valToPos(domainLeft, "x", true);
-            const pxRight = u.valToPos(domainRight, "x", true);
-            barWidthPx = Math.abs(pxRight - pxLeft);
-            break;
-          }
-        }
-
-        const newRadius = barWidthPx > 2 ? userRadius : 0;
-        if (newRadius !== oldRadius) {
-          curRadius = newRadius;
-          oldRadius = newRadius;
-          for (let i = 0; i < u.series.length; i++) {
-            (u.series[i] as any)._paths = null;
-          }
-          u.redraw();
-        }
+        updateRadius(u);
       },
     },
 
@@ -494,7 +507,6 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
 
         if (found) {
           hovered = found;
-
           return (found as QuadObj).didx;
         } else {
           if (hovered && hovered.sidx === sidx) {
@@ -522,15 +534,15 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
         const userRangeFn = optsObj.scales.y.range;
 
         optsObj.scales.y.range = (uPlotInst, min, max, scaleKey) => {
-          const barSeriesIdxs: number[] = [];
+          const activeBarSeries: number[] = [];
           for (let i = 1; i < uPlotInst.series.length; i++) {
             if (!ignore.includes(i)) {
-              barSeriesIdxs.push(i);
+              activeBarSeries.push(i);
             }
           }
 
           const xVals = uPlotInst.data[0] as number[] | undefined;
-          if (!xVals || !barSeriesIdxs.length) {
+          if (!xVals || !activeBarSeries.length) {
             return typeof userRangeFn === "function"
               ? userRangeFn(uPlotInst, min, max, scaleKey)
               : [0, max];
@@ -540,7 +552,7 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
             let maxStackVal = 0;
             for (let i = 0; i < xVals.length; i++) {
               let sum = 0;
-              for (let s of barSeriesIdxs) {
+              for (const s of activeBarSeries) {
                 const val = (uPlotInst.data[s] as (number | null)[])[i] ?? 0;
                 sum += val;
               }
@@ -548,12 +560,14 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
             }
             const newMin = Math.min(0, min);
             const newMax = Math.max(max, maxStackVal);
+
             return typeof userRangeFn === "function"
               ? userRangeFn(uPlotInst, newMin, newMax, scaleKey)
               : [0, newMax];
           } else {
             const newMin = Math.min(0, min);
             const newMax = Math.max(0, max);
+
             return typeof userRangeFn === "function"
               ? userRangeFn(uPlotInst, newMin, newMax, scaleKey)
               : [0, newMax];
@@ -563,7 +577,9 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
 
       for (let i = 1; i < optsObj.series.length; i++) {
         if (ignore.includes(i)) continue;
+
         optsObj.series[i].paths = barsBuilderFactory();
+
         optsObj.series[i].points = {
           show: showValues
             ? (u: uPlot, seriesIdx: number) => {

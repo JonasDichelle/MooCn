@@ -8,10 +8,18 @@ import { cn } from "@/lib/utils";
 import { useThemeMode } from "@/registry/lib/moocn-utils";
 import { cloneAndResolveColors } from "@/registry/lib/moocn-utils";
 
+export type MoocnOptions = Omit<
+  uPlot.Options,
+  "width" | "height" | "select"
+> & {
+  select?: Partial<uPlot.Select>;
+};
+
 export interface MoocnProps
   extends Omit<React.ComponentProps<"div">, "children"> {
-  options: uPlot.Options;
-  data: (number | null)[][];
+  options: MoocnOptions;
+
+  data: (number | null)[][] | Float64Array[];
 }
 
 export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
@@ -20,12 +28,28 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
     const [hasMeasured, setHasMeasured] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const isDarkMode = useThemeMode();
-    const [chartWidth, setChartWidth] = React.useState(options.width ?? 0);
-    const [chartHeight, setChartHeight] = React.useState(options.height ?? 0);
+    const [chartWidth, setChartWidth] = React.useState(0);
+    const [chartHeight, setChartHeight] = React.useState(0);
 
-    const typedData = data.map(
-      (arr) => new Float64Array(arr.map((val) => (val === null ? NaN : val)))
-    );
+    const typedData = React.useMemo(() => {
+      return data.map((arr) => {
+        if (
+          arr instanceof Float64Array ||
+          arr instanceof Float32Array ||
+          arr instanceof Int32Array ||
+          arr instanceof Int16Array ||
+          arr instanceof Int8Array ||
+          arr instanceof Uint32Array ||
+          arr instanceof Uint16Array ||
+          arr instanceof Uint8ClampedArray ||
+          arr instanceof Uint8Array
+        ) {
+          return arr;
+        } else {
+          return new Float64Array(arr.map((val) => (val == null ? NaN : val)));
+        }
+      });
+    }, [data]);
 
     React.useLayoutEffect(() => {
       const element = containerRef.current;
@@ -66,6 +90,7 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
           },
         ],
       };
+
       return {
         ...colorResolvedOpts,
         width: chartWidth,
@@ -85,7 +110,7 @@ export const Moocn = React.forwardRef<uPlot | null, MoocnProps>(
       <div className={cn("relative", className)} style={style} {...rest}>
         <div className="block box-border w-full h-full" ref={containerRef}>
           <div
-            className=" absolute h-full w-full"
+            className="absolute h-full w-full"
             style={{
               visibility: hasMeasured ? "visible" : "hidden",
             }}
