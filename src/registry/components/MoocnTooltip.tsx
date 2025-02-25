@@ -1,5 +1,5 @@
 import * as React from "react";
-import uPlot, { Options as UplotOptions } from "uplot";
+import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { cn } from "@/lib/utils";
 import { MoocnContext } from "@/registry/components/Moocn";
@@ -12,8 +12,6 @@ export interface MoocnTooltipProps
   hideLabel?: boolean;
   hideIndicator?: boolean;
   indicator?: "line" | "dot" | "dashed";
-  nameKey?: string;
-  labelKey?: string;
   labelFormatter?: (xValue: number, items: TooltipItem[]) => React.ReactNode;
   formatter?: (
     value: number,
@@ -45,8 +43,6 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
       hideLabel = false,
       hideIndicator = false,
       indicator = "dot",
-      nameKey,
-      labelKey,
       labelFormatter,
       labelClassName,
       formatter,
@@ -124,9 +120,6 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
     let tooltipTop = cursorTop;
 
     if (collisionAvoidance && chart) {
-      const axes = chart.axes;
-      //   const axisXSize = axes?.[0]?.size() ?? 0;
-      //   const axisYSize = axes?.[1]?.size() ?? 0;
       const axisXSize = 0;
       const axisYSize = 0;
 

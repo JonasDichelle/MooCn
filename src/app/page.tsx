@@ -1,33 +1,11 @@
 "use client";
 
+import "uplot/dist/uPlot.min.css";
+
 import React, { useState } from "react";
-import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/modeToggle";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-// ^ Make sure you have @radix-ui/react-tabs or shadcn/ui properly installed & configured
-
-import uPlot from "uplot";
-import "uplot/dist/uPlot.min.css";
-import {
-  Moocn,
-  MoocnProvider,
-  MoocnOptions,
-} from "@/registry/components/Moocn";
-import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
-import { MoocnLegend } from "@/registry/components/MoocnLegend";
-import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
-
 import { BarChartMultipleSimple } from "@/components/examples/bar-chart-multiple-simple";
 import { AreaChartInteractive } from "@/components/examples/area-chart-interactive";
 import { SimpleLineChart } from "@/components/examples/simple-line-chart";
@@ -44,11 +22,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-7xl px-4">
-        {/* Header */}
         <header className="border-b py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold">🐮 MooCn Charts</h1>
-            {/* Tabs for Basics / Stress Tests */}
             <div className="space-x-2">
               <Button
                 variant={activeTab === "basics" ? "default" : "secondary"}
@@ -83,20 +59,16 @@ export default function HomePage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="py-4 grid gap-4">
           {activeTab === "basics" && (
             <div className="flex flex-col space-y-4">
-              {/* Row: Simple Area Chart + Bar Chart Multiple Simple */}
               <div className="grid gap-4 md:grid-cols-2">
                 <SimpleAreaStacked />
                 <BarChartMultipleSimple />
               </div>
 
-              {/* Row: Area Chart Interactive */}
               <AreaChartInteractive />
 
-              {/* Row: Three Simple Line Charts */}
               <div className="grid gap-4 md:grid-cols-3">
                 <SimpleLineChart pathType="smooth" />
                 <SimpleLineChart pathType="linear" />
@@ -107,7 +79,6 @@ export default function HomePage() {
 
           {activeTab === "stress-tests" && (
             <div className="grid gap-4">
-              {/* A nested Tabs component for the different stress tests */}
               <Tabs defaultValue="sine-stream" className="w-full">
                 <TabsList>
                   <TabsTrigger value="sine-stream">Sine Stream</TabsTrigger>

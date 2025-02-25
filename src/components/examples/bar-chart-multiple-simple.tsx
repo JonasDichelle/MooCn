@@ -19,10 +19,7 @@ import {
   MoocnProvider,
 } from "@/registry/components/Moocn";
 import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
-import { MoocnLegend } from "@/registry/components/MoocnLegend";
-
 import { multiBarPlugin } from "@/registry/lib/moocn-multi-bars";
-import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },

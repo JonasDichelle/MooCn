@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
 import {
@@ -59,7 +58,7 @@ function randomWalk(
   min: number,
   max: number
 ): number[] {
-  let points = [];
+  const points = [];
   let val = initialValue;
   for (let i = 0; i < steps; i++) {
     const incr = randFunc();

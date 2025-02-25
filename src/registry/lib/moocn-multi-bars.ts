@@ -1,3 +1,5 @@
+"use client";
+
 import uPlot from "uplot";
 import { computeCssColor } from "@/registry/lib/moocn-utils";
 

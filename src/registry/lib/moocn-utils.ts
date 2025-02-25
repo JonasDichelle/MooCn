@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { MoocnOptions } from "../components/Moocn";
 
@@ -6,6 +8,7 @@ function expandCssVars(color: string, el: HTMLElement): string {
   const varRegex = /var\((--[a-zA-Z0-9\-_]+)\)/;
   let result = color;
   let match: RegExpMatchArray | null;
+
   while ((match = result.match(varRegex))) {
     const [fullMatch, varName] = match;
     const varValue = style.getPropertyValue(varName).trim();
@@ -16,7 +19,6 @@ function expandCssVars(color: string, el: HTMLElement): string {
 
 function fixDoubleWrapping(color: string): string {
   const colorFnRegex = /^(hsl|rgb|hwb|cmyk|lab|lch|oklab|oklch)\(\s*(.+)\)$/i;
-
   while (true) {
     const match = color.match(colorFnRegex);
     if (!match) break;
@@ -46,18 +48,56 @@ function fixSlashPlacement(color: string): string {
   return color;
 }
 
+function fixColorFnHex(color: string): string {
+  const regex = /^(\w+)\(\s*(#[0-9A-Fa-f]{3,8})(?:\s*\/\s*([^)]+))?\)\s*$/;
+  const match = color.match(regex);
+  if (!match) {
+    return color;
+  }
+  const [, , hex, alphaRaw] = match;
+  const [r, g, b] = hexToRgb(hex);
+
+  let alphaNum = 1;
+  if (alphaRaw !== undefined) {
+    if (alphaRaw.endsWith("%")) {
+      alphaNum = parseFloat(alphaRaw) / 100;
+    } else {
+      alphaNum = parseFloat(alphaRaw);
+    }
+  }
+  if (alphaNum < 1) {
+    return `rgba(${r}, ${g}, ${b}, ${alphaNum})`;
+  } else {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  hex = hex.replace(/^#/, "");
+  if (hex.length === 3) {
+    hex = hex
+      .split("")
+      .map((x) => x + x)
+      .join("");
+  }
+  const intVal = parseInt(hex, 16);
+  const r = (intVal >> 16) & 255;
+  const g = (intVal >> 8) & 255;
+  const b = intVal & 255;
+  return [r, g, b];
+}
+
 export function computeCssColor(
   color: any,
   el: HTMLElement | null = null
 ): string {
-  if (el === null) {
-    if (typeof window === "undefined") return "#000";
-    el = document.documentElement;
-  }
+  if (typeof window === "undefined") return "#000";
+  if (!el) el = document.documentElement;
   const expanded = expandCssVars(color, el);
   const unwrapped = fixDoubleWrapping(expanded);
   const fixedSlash = fixSlashPlacement(unwrapped);
-  return fixedSlash;
+  const final = fixColorFnHex(fixedSlash);
+  return final;
 }
 
 export function checkDarkMode() {
