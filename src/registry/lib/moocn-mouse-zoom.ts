@@ -12,6 +12,14 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
   let yMin: number, yMax: number;
   let xRange: number, yRange: number;
 
+  // Cache plot dimensions and update on resize
+  let rect: DOMRect;
+  let rafPending = false;
+
+  // For throttling wheel events
+  let lastWheelEvent = 0;
+  const WHEEL_THROTTLE_MS = 16; // ~60fps
+
   function clampRange(
     newRange: number,
     newMin: number,
@@ -36,6 +44,7 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
   return {
     hooks: {
       ready: (u: uPlot) => {
+        // Store the initial full range of the data
         xMin = u.scales.x.min!;
         xMax = u.scales.x.max!;
         yMin = u.scales.y.min!;
@@ -45,7 +54,22 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
         yRange = yMax - yMin;
 
         const over = u.over;
-        const rect = over.getBoundingClientRect();
+        rect = over.getBoundingClientRect();
+
+        // Update rect when window resizes
+        const updateRect = () => {
+          if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(() => {
+              rect = over.getBoundingClientRect();
+              rafPending = false;
+            });
+          }
+        };
+
+        window.addEventListener("resize", updateRect, { passive: true });
+        // Also update when the plot might resize
+        new ResizeObserver(updateRect).observe(over);
 
         // Middle-click drag pan in both X & Y
         over.addEventListener("mousedown", (e) => {
@@ -59,55 +83,60 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
 
             const scXMin0 = u.scales.x.min!;
             const scXMax0 = u.scales.x.max!;
-            const scYMin0 = u.scales.y.min!;
-            const scYMax0 = u.scales.y.max!;
+            const visibleRange = scXMax0 - scXMin0;
 
-            // how many "data units" per pixel horizontally
-            const xUnitsPerPx = u.posToVal(1, "x") - u.posToVal(0, "x");
-            // how many "data units" per pixel vertically
-            const yUnitsPerPx = u.posToVal(1, "y") - u.posToVal(0, "y");
+            // Pre-calculate units per pixel for better performance
+            const xUnitsPerPx = visibleRange / rect.width;
+
+            let lastX = startX;
+            let rafId: number | null = null;
+
+            function updatePan(clientX: number) {
+              if (rafId !== null) return; // Skip if a frame is already pending
+
+              rafId = requestAnimationFrame(() => {
+                const deltaX = clientX - lastX;
+                lastX = clientX;
+
+                // Scale pixel movement to data units
+                const dx = xUnitsPerPx * deltaX;
+
+                // Get current scale values (they may have changed)
+                const currentMin = u.scales.x.min!;
+                const currentMax = u.scales.x.max!;
+
+                // new X bounds
+                let nxMin = currentMin - dx;
+                let nxMax = currentMax - dx;
+
+                // Apply clamping
+                if (nxMin < xMin) {
+                  const offset = xMin - nxMin;
+                  nxMin = xMin;
+                  nxMax = nxMax + offset;
+                } else if (nxMax > xMax) {
+                  const offset = nxMax - xMax;
+                  nxMax = xMax;
+                  nxMin = nxMin - offset;
+                }
+
+                u.setScale("x", { min: nxMin, max: nxMax });
+                rafId = null;
+              });
+            }
 
             function onmove(ev: MouseEvent) {
               ev.preventDefault();
-              const deltaX = ev.clientX - startX;
-              const deltaY = ev.clientY - startY;
-
-              const dx = xUnitsPerPx * deltaX;
-              const dy = yUnitsPerPx * deltaY;
-
-              // new X bounds
-              let nxMin = scXMin0 - dx;
-              let nxMax = scXMax0 - dx;
-              [nxMin, nxMax] = clampRange(
-                nxMax - nxMin,
-                nxMin,
-                nxMax,
-                xRange,
-                xMin,
-                xMax
-              );
-
-              // new Y bounds
-              let nyMin = scYMin0 - dy;
-              let nyMax = scYMax0 - dy;
-              [nyMin, nyMax] = clampRange(
-                nyMax - nyMin,
-                nyMin,
-                nyMax,
-                yRange,
-                yMin,
-                yMax
-              );
-
-              u.batch(() => {
-                u.setScale("x", { min: nxMin, max: nxMax });
-                // u.setScale("y", { min: nyMin, max: nyMax });
-              });
+              updatePan(ev.clientX);
             }
 
             function onup() {
               document.removeEventListener("mousemove", onmove);
               document.removeEventListener("mouseup", onup);
+              if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+              }
             }
 
             document.addEventListener("mousemove", onmove);
@@ -115,53 +144,84 @@ export function wheelZoomPlugin(opts: { factor?: number } = {}) {
           }
         });
 
-        // Wheel scroll zoom around cursor (X & Y)
-        over.addEventListener("wheel", (e) => {
-          e.preventDefault();
+        // Wheel scroll zoom around cursor (X only)
+        over.addEventListener(
+          "wheel",
+          (e) => {
+            e.preventDefault();
 
-          const left = u.cursor.left!;
-          const top = u.cursor.top!;
+            // Throttle wheel events for smoother zooming
+            const now = performance.now();
+            if (now - lastWheelEvent < WHEEL_THROTTLE_MS) return;
+            lastWheelEvent = now;
 
-          const leftPct = left / rect.width;
-          const btmPct = 1 - top / rect.height;
+            // Calculate cursor position relative to the plot
+            const left = e.clientX - rect.left;
 
-          const xVal = u.posToVal(left, "x");
-          const yVal = u.posToVal(top, "y");
+            // Only proceed if cursor is within plot area
+            if (left < 0 || left > rect.width) return;
 
-          const oxRange = u.scales.x.max! - u.scales.x.min!;
-          const oyRange = u.scales.y.max! - u.scales.y.min!;
+            // Calculate position as percentage of plot width
+            const leftPct = left / rect.width;
 
-          const zoomOut = e.deltaY > 0; // scroll down => zoom out
-          const nxRange = zoomOut ? oxRange / factor : oxRange * factor;
-          const nyRange = zoomOut ? oyRange / factor : oyRange * factor;
+            // Convert cursor position to value in data space
+            const xVal = u.posToVal(left, "x");
+            if (xVal === null || !isFinite(xVal)) return;
 
-          let nxMin = xVal - leftPct * nxRange;
-          let nxMax = nxMin + nxRange;
-          [nxMin, nxMax] = clampRange(
-            nxRange,
-            nxMin,
-            nxMax,
-            xRange,
-            xMin,
-            xMax
-          );
+            // Current visible range
+            const oxRange = u.scales.x.max! - u.scales.x.min!;
 
-          let nyMin = yVal - btmPct * nyRange;
-          let nyMax = nyMin + nyRange;
-          [nyMin, nyMax] = clampRange(
-            nyRange,
-            nyMin,
-            nyMax,
-            yRange,
-            yMin,
-            yMax
-          );
+            // Calculate new range based on zoom direction
+            const zoomOut = e.deltaY > 0; // scroll down => zoom out
+            const nxRange = zoomOut ? oxRange / factor : oxRange * factor;
 
-          u.batch(() => {
+            // Calculate new min/max ensuring the cursor position stays fixed
+            let nxMin = xVal - leftPct * nxRange;
+            let nxMax = nxMin + nxRange;
+
+            // Quick clamp without array creation for better performance
+            if (nxRange > xRange) {
+              nxMin = xMin;
+              nxMax = xMax;
+            } else if (nxMin < xMin) {
+              nxMin = xMin;
+              nxMax = xMin + nxRange;
+            } else if (nxMax > xMax) {
+              nxMax = xMax;
+              nxMin = xMax - nxRange;
+            }
+
+            // Apply the new scales
             u.setScale("x", { min: nxMin, max: nxMax });
-            // u.setScale("y", { min: nyMin, max: nyMax });
-          });
-        });
+          },
+          { passive: false }
+        );
+      },
+
+      // Update the bounds when the data changes
+      setData: (u: uPlot) => {
+        // Only update if data is available
+        if (u.data[0] && u.data[0].length > 0) {
+          // Only update the full range if it's actually bigger
+          const dataXMin = u.data[0][0];
+          const dataXMax = u.data[0][u.data[0].length - 1];
+
+          // Only update if needed
+          let updated = false;
+          if (dataXMin < xMin) {
+            xMin = dataXMin;
+            updated = true;
+          }
+          if (dataXMax > xMax) {
+            xMax = dataXMax;
+            updated = true;
+          }
+
+          // Only recalculate range if min/max changed
+          if (updated) {
+            xRange = xMax - xMin;
+          }
+        }
       },
     },
   } as uPlot.Plugin;

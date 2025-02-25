@@ -21,8 +21,8 @@ import { multiBarPlugin } from "@/registry/lib/moocn-multi-bars";
 import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
 import uPlot from "uplot";
 
-const DATA_COUNT = 10000;
-const SERIES_COUNT = 12;
+const DATA_COUNT = 100000;
+const SERIES_COUNT = 5;
 
 function generateData() {
   const xVals = Array.from({ length: DATA_COUNT }, (_, i) => i);
@@ -60,13 +60,13 @@ const options: MoocnOptions = {
   select: { show: false } as uPlot.Select,
   scales: {
     y: {
-      range: (u, min, max) => [0, max],
+      range: (u, min, max) => [0, 500],
     },
     x: { time: false },
   },
   plugins: [
     multiBarPlugin({
-      stacked: false,
+      stacked: true,
       ignore: [],
       radius: 0.1,
       groupWidth: 0.8,
@@ -76,6 +76,7 @@ const options: MoocnOptions = {
     }),
     wheelZoomPlugin({ factor: 0.75 }),
   ],
+  cursor: { x: false, y: false },
   axes: [
     {
       space: 100,
@@ -107,7 +108,7 @@ export default function ManySeriesBarchartExample() {
         </CardHeader>
 
         <CardContent className="h-[400px] w-full">
-          <MoocnTooltip />
+          {/* <MoocnTooltip /> */}
           <Moocn data={data} options={options} className="h-full w-full" />
           <MoocnLegend />
         </CardContent>

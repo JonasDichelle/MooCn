@@ -18,7 +18,6 @@ export type MoocnOptions = Omit<
 export interface MoocnProps
   extends Omit<React.ComponentProps<"div">, "children"> {
   options: MoocnOptions;
-
   data: (number | null)[][] | Float64Array[];
 }
 
@@ -29,6 +28,8 @@ export function Moocn(props: MoocnProps) {
   const isDarkMode = useThemeMode();
   const [chartWidth, setChartWidth] = React.useState(0);
   const [chartHeight, setChartHeight] = React.useState(0);
+
+  const [chartInstance, setChartInstance] = React.useState<uPlot | null>(null);
 
   const typedData = React.useMemo(() => {
     return data.map((arr) => {
@@ -93,18 +94,26 @@ export function Moocn(props: MoocnProps) {
 
     return {
       ...colorResolvedOpts,
-      width: chartWidth,
-      height: chartHeight,
       hooks: mergedHooks,
     } as uPlot.Options;
-  }, [colorResolvedOpts, chartWidth, chartHeight, handleSetCursor]);
+  }, [colorResolvedOpts, handleSetCursor]);
 
   const onCreate = React.useCallback(
-    (chartInstance: uPlot) => {
-      handleChartCreate?.(chartInstance);
+    (instance: uPlot) => {
+      setChartInstance(instance);
+      handleChartCreate?.(instance);
     },
     [handleChartCreate]
   );
+
+  React.useEffect(() => {
+    if (chartInstance) {
+      chartInstance.setSize({
+        width: chartWidth,
+        height: chartHeight,
+      });
+    }
+  }, [chartWidth, chartHeight, chartInstance]);
 
   return (
     <div className={cn("relative", className)} style={style} {...rest}>

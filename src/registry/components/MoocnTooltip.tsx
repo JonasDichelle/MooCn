@@ -8,7 +8,6 @@ export interface MoocnTooltipProps
   extends React.HTMLAttributes<HTMLDivElement> {
   showIndexValue?: boolean;
   indexValueLabel?: string;
-  collisionAvoidance?: boolean;
   hideLabel?: boolean;
   hideIndicator?: boolean;
   indicator?: "line" | "dot" | "dashed";
@@ -22,6 +21,9 @@ export interface MoocnTooltipProps
   ) => React.ReactNode;
   color?: string;
   labelClassName?: string;
+  offsetX?: number;
+  offsetY?: number;
+  containerPadding?: number;
 }
 
 interface TooltipItem {
@@ -39,7 +41,6 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
       className,
       showIndexValue = true,
       indexValueLabel = "X",
-      collisionAvoidance = true,
       hideLabel = false,
       hideIndicator = false,
       indicator = "dot",
@@ -47,28 +48,27 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
       labelClassName,
       formatter,
       color,
+      offsetX = 48,
+      offsetY = 32,
+      containerPadding = 24,
       ...divProps
     },
     ref
   ) {
+    const { chart, cursorState } = React.useContext(MoocnContext);
+
     const tooltipRef = React.useRef<HTMLDivElement>(null);
     const [tooltipSize, setTooltipSize] = React.useState({
       width: 0,
       height: 0,
     });
-    const { chart, cursorState } = React.useContext(MoocnContext);
 
     React.useLayoutEffect(() => {
       if (tooltipRef.current) {
-        const rect = tooltipRef.current.getBoundingClientRect();
-        if (
-          rect.width !== tooltipSize.width ||
-          rect.height !== tooltipSize.height
-        ) {
-          setTooltipSize({ width: rect.width, height: rect.height });
-        }
+        const { offsetWidth, offsetHeight } = tooltipRef.current;
+        setTooltipSize({ width: offsetWidth, height: offsetHeight });
       }
-    }, [cursorState, tooltipSize]);
+    }, [chart, cursorState]);
 
     const hoveredIdx = cursorState.idx;
     const cursorLeft = cursorState.left;
@@ -85,6 +85,7 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
           xValue = rawX;
         }
       }
+
       for (let i = 1; i < series.length; i++) {
         const s = series[i];
         if (!s.show || hoveredIdx === null) continue;
@@ -110,42 +111,30 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
       cursorLeft !== null &&
       cursorTop !== null;
 
-    // If not hovering or no items, don't render
     if (!active || items.length === 0) {
       return null;
     }
 
-    const { width: tw, height: th } = tooltipSize;
-    let tooltipLeft = cursorLeft;
-    let tooltipTop = cursorTop;
+    let tooltipLeft = cursorLeft + offsetX;
+    let tooltipTop = cursorTop + offsetY;
 
-    if (collisionAvoidance && chart) {
-      const axisXSize = 0;
-      const axisYSize = 0;
+    if (chart?.root) {
+      const chartRoot = chart.root;
+      const chartWidth = chartRoot.offsetWidth;
+      const chartHeight = chartRoot.offsetHeight;
 
-      const PAD = 16;
-      tooltipLeft += axisYSize + PAD * 3;
-      tooltipTop += axisXSize + PAD * 2;
-
-      const {
-        left: chartX,
-        top: chartY,
-        width: chartW,
-        height: chartH,
-      } = chart.bbox;
-
-      if (tooltipLeft + tw > chartX + chartW) {
-        tooltipLeft = chartX + chartW - tw - PAD;
+      if (tooltipLeft + tooltipSize.width > chartWidth - containerPadding) {
+        tooltipLeft = chartWidth - tooltipSize.width - containerPadding;
       }
-      if (tooltipLeft < chartX) {
-        tooltipLeft = chartX + PAD;
+      if (tooltipLeft < containerPadding) {
+        tooltipLeft = containerPadding;
       }
 
-      if (tooltipTop + th > chartY + chartH) {
-        tooltipTop = chartY + chartH - th - PAD;
+      if (tooltipTop + tooltipSize.height > chartHeight - containerPadding) {
+        tooltipTop = chartHeight - tooltipSize.height - containerPadding;
       }
-      if (tooltipTop < chartY) {
-        tooltipTop = chartY + PAD;
+      if (tooltipTop < containerPadding) {
+        tooltipTop = containerPadding;
       }
     }
 
@@ -169,7 +158,13 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
 
     return (
       <div
-        ref={ref}
+        ref={(node) => {
+          if (typeof ref === "function") ref(node);
+          else if (ref)
+            (ref as React.MutableRefObject<HTMLDivElement | null>).current =
+              node;
+          tooltipRef.current = node;
+        }}
         className={cn("absolute pointer-events-none z-10", className)}
         style={{
           transform: `translate(${tooltipLeft}px, ${tooltipTop}px)`,
@@ -177,7 +172,6 @@ export const MoocnTooltip = React.forwardRef<HTMLDivElement, MoocnTooltipProps>(
         }}
       >
         <div
-          ref={tooltipRef}
           className={cn(
             "border-border/50 bg-background",
             "grid min-w-[8rem] items-start gap-1.5 rounded-lg border",

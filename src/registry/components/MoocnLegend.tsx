@@ -10,6 +10,24 @@ export interface MoocnLegendProps extends React.HTMLAttributes<HTMLDivElement> {
   indexValueLabel?: string;
 }
 
+interface MeasureTextWidth {
+  (text: string, font?: string): number;
+  _canvas?: HTMLCanvasElement;
+}
+
+const measureTextWidth: MeasureTextWidth = (
+  text: string,
+  font = "12px monospace"
+): number => {
+  const canvas =
+    measureTextWidth._canvas ??
+    (measureTextWidth._canvas = document.createElement("canvas"));
+  const context = canvas.getContext("2d");
+  if (!context) return 0;
+  context.font = font;
+  return context.measureText(text).width;
+};
+
 export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
   function MoocnLegend(
     {
@@ -24,14 +42,15 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
   ) {
     const { chart, cursorState } = React.useContext(MoocnContext);
     const [isStale, setStale] = React.useState(false);
+    const [maxWidths, setMaxWidths] = React.useState<{ [key: number]: number }>(
+      {}
+    );
+
     const hoveredIdx = cursorState.idx;
-
-    if (!chart) {
-      return null;
-    }
-
-    const { data, series } = chart;
     function buildItems() {
+      if (!chart) return [];
+
+      const { data, series } = chart;
       const results: {
         index: number;
         name: string;
@@ -40,6 +59,7 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
         show: boolean;
         clickable: boolean;
       }[] = [];
+
       const hoveredVals =
         hoveredIdx != null
           ? data.map((arr) => {
@@ -47,6 +67,7 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
               return typeof val === "number" ? val : null;
             })
           : data.map(() => null);
+
       if (showIndexValue) {
         let xVal: number | null = null;
         if (hoveredIdx != null && data[0][hoveredIdx] != null) {
@@ -62,10 +83,12 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
           clickable: false,
         });
       }
+
       for (let i = 1; i < series.length; i++) {
         const s = series[i];
         const labelName = s.label || `Series ${i}`;
         const color = (s as any).stroke?.() || (s as any).fill || "#666";
+
         results.push({
           index: i,
           name: labelName,
@@ -79,15 +102,58 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
     }
 
     const items = buildItems();
+
+    React.useEffect(() => {
+      if (!chart || items.length === 0) return;
+      const newMaxWidths = { ...maxWidths };
+      for (const item of items) {
+        if (item.index === -1 && item.value == null) {
+          continue;
+        }
+
+        const labelWidth = measureTextWidth(item.name, "12px monospace");
+
+        if (item.value != null) {
+          const labelValueText = `${item.name}: ${item.value.toLocaleString()}`;
+          const labelValueWidth = measureTextWidth(
+            labelValueText,
+            "12px monospace"
+          );
+
+          const currentMax = newMaxWidths[item.index] ?? 0;
+          const bigger =
+            labelValueWidth > currentMax ? labelValueWidth : currentMax;
+          newMaxWidths[item.index] = Math.ceil(bigger);
+        } else {
+          newMaxWidths[item.index] = Math.ceil(labelWidth);
+        }
+      }
+
+      const changed = Object.keys(newMaxWidths).some((k) => {
+        const key = Number(k);
+        return newMaxWidths[key] !== maxWidths[key];
+      });
+
+      if (changed) {
+        setMaxWidths(newMaxWidths);
+      }
+    }, [chart, items, maxWidths]);
+
+    if (!chart) {
+      return null;
+    }
     if (items.length === 0) {
       return null;
     }
+
     return (
       <div
         {...divProps}
         ref={ref}
         className={cn(
-          "flex items-center justify-center gap-4",
+          "flex flex-nowrap items-center",
+
+          "justify-start gap-4",
           verticalAlign === "top" ? "pb-3" : "pt-3",
           "border-0 border-border/50 bg-background py-2 px-4 text-xs",
           className
@@ -100,6 +166,7 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
           if (item.value != null) {
             labelText += `: ${item.value.toLocaleString()}`;
           }
+
           const handleClick = () => {
             if (!item.clickable) return;
             chart.setSeries(item.index, { show: !item.show });
@@ -113,20 +180,29 @@ export const MoocnLegend = React.forwardRef<HTMLDivElement, MoocnLegendProps>(
             if (!item.clickable) return;
             chart.setSeries(null, { focus: false });
           };
+
+          const pinnedWidth = maxWidths[item.index]
+            ? maxWidths[item.index] + 8
+            : undefined;
+
           return (
             <div
               key={item.index}
               className={cn(
-                "flex items-center gap-1.5 select-none cursor-pointer",
+                "inline-flex items-center select-none cursor-pointer whitespace-nowrap",
                 !item.show && "opacity-50"
               )}
+              style={{
+                width: pinnedWidth ? `${pinnedWidth}px` : undefined,
+                transition: "width 0.3s ease",
+              }}
               onClick={handleClick}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
               {!hideIcon && (
                 <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
+                  className="mr-1.5 h-2 w-2 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: item.color }}
                 />
               )}
