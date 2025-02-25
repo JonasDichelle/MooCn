@@ -1,4 +1,8 @@
 # 🐮 MooCn Charts
+[Demo](https://jonasdichelle.github.io/MooCn/)
+
+![moo](https://github.com/user-attachments/assets/e47faab1-6426-4c6f-9539-50317a21f6fd)
+
 
 MooCn is a [shadcn](https://ui.shadcn.com/)-style chart component built on [μPlot](https://github.com/leeoniya/uPlot), an incredibly fast and lightweight plotting library.
 While μPlot has some of the best performance out there, it can be tricky to style. MooCn let's you integrate μPlot with shadcn's design system, which makes it really easy to make some nice looking and super fast charts!
@@ -16,12 +20,7 @@ While μPlot has some of the best performance out there, it can be tricky to sty
 
 # Installation
 
-Adding MooCn to your project is straightforward. You can choose between using the Shadcn CLI for a quick setup or installing it manually. Follow the steps below based on your preference.
-
 ## Option 1: Install with Shadcn CLI
-
-The easiest way to integrate MooCn into your existing project is through the Shadcn CLI. This method automatically adds the necessary components to your project.
-
 ### Step 1: Add Base MooCn Components
 
 Run the following command to install the core MooCn component along with the tooltip and legend components:
@@ -34,20 +33,18 @@ This will place the base MooCn component, tooltip, and legend components into yo
 
 ### Step 2 (Optional): Add Multi-Series Bar Charts
 
-If you’d like to include support for multi-series bar charts, install the multi-bar plugin with this command:
+If you’d like to include support for multi-series bar charts, install the multi-bar plugin to your lib directory with this command:
 
 ```bash
 npx shadcn@latest add https://jonasdichelle.github.io/MooCn/r/moocn-multi-bars.json
 ```
 
-This command fetches and installs the MooCn components into your /components directory, just like other Shadcn components.
-
 That’s it! You’re ready to start using MooCn in your project.
+
+<br>
 <br>
 
 ## Option 2: Manual Installation
-
-If you prefer more control or don’t use the Shadcn CLI, you can install MooCn manually by following these steps.
 
 ### Step 1: Install Dependencies
 
@@ -89,6 +86,9 @@ Once you've completed the steps above, your project should look like this:
  ┃ ┣ 📜 moocn-utils.ts
  ┃ ┗ 📜 moocn-multi-bars.ts  (Optional)
 ```
+
+<br>
+<br>
 
 # Usage
 
@@ -157,3 +157,8 @@ export default function SimpleMoocnExample() {
 I like shadcn’s chart aesthetics, but it relies on Recharts, which is based on SVG and struggles with large datasets. When I found μPlot and saw how fast it was I really wanted to make this library.
 
 <sub><sup>It's called MooCn because the letter `μ` in μPlot kind of sounds like moo, the sound a cow makes.</sup></sub>
+
+![moo2](https://github.com/user-attachments/assets/bee5faa3-3382-4f4f-9df3-46247474865a)
+
+![moo3](https://github.com/user-attachments/assets/b7b53129-11b2-4c48-b8e4-844d962012bf)
+
