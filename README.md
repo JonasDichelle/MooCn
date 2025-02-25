@@ -1,4 +1,8 @@
 # 🐮 MooCn Charts
+[Demo](https://jonasdichelle.github.io/MooCn/)
+
+![moo](https://github.com/user-attachments/assets/e47faab1-6426-4c6f-9539-50317a21f6fd)
+
 
 MooCn is a [shadcn](https://ui.shadcn.com/)-style chart component built on [μPlot](https://github.com/leeoniya/uPlot), an incredibly fast and lightweight plotting library.
 While μPlot has some of the best performance out there, it can be tricky to style. MooCn let's you integrate μPlot with shadcn's design system, which makes it really easy to make some nice looking and super fast charts!
@@ -157,3 +161,8 @@ export default function SimpleMoocnExample() {
 I like shadcn’s chart aesthetics, but it relies on Recharts, which is based on SVG and struggles with large datasets. When I found μPlot and saw how fast it was I really wanted to make this library.
 
 <sub><sup>It's called MooCn because the letter `μ` in μPlot kind of sounds like moo, the sound a cow makes.</sup></sub>
+
+![moo2](https://github.com/user-attachments/assets/bee5faa3-3382-4f4f-9df3-46247474865a)
+
+![moo3](https://github.com/user-attachments/assets/b7b53129-11b2-4c48-b8e4-844d962012bf)
+
