@@ -16,10 +16,8 @@ import {
   MoocnProvider,
 } from "@/registry/components/Moocn";
 import { MoocnLegend } from "@/registry/components/MoocnLegend";
-import { MoocnTooltip } from "@/registry/components/MoocnTooltip";
 import { multiBarPlugin } from "@/registry/lib/moocn-multi-bars";
 import { wheelZoomPlugin } from "@/registry/lib/moocn-mouse-zoom";
-import uPlot from "uplot";
 
 const DATA_COUNT = 100000;
 const SERIES_COUNT = 5;
@@ -104,7 +102,7 @@ export default function ManySeriesBarchartExample() {
       <Card>
         <CardHeader>
           <CardTitle>MooltiSeries Barchart</CardTitle>
-          <CardDescription>12 x 10,000 bars</CardDescription>
+          <CardDescription>5 x 100,000 bars</CardDescription>
         </CardHeader>
 
         <CardContent className="h-[400px] w-full">

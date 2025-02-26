@@ -207,7 +207,7 @@ export function AreaChartInteractive() {
       {
         label: chartConfig.mobile.label,
         stroke: chartConfig.mobile.color,
-        fill: (u: uPlot, si: number) =>
+        fill: (u: uPlot) =>
           createVerticalGradient(
             u,
             "hsl(var(--chart-2)/5%)",
@@ -223,7 +223,7 @@ export function AreaChartInteractive() {
       {
         label: chartConfig.desktop.label,
         stroke: chartConfig.desktop.color,
-        fill: (u: uPlot, si: number) =>
+        fill: (u: uPlot) =>
           createVerticalGradient(
             u,
             "hsl(var(--chart-1)/5%)",

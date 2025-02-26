@@ -78,7 +78,7 @@ const options = {
     {
       label: chartConfig.desktop.label,
       stroke: chartConfig.desktop.color,
-      fill: (u: uPlot, si: number) =>
+      fill: (u: uPlot) =>
         createVerticalGradient(
           u,
           "hsl(var(--chart-1)/5%)",
@@ -94,7 +94,7 @@ const options = {
     {
       label: chartConfig.mobile.label,
       stroke: chartConfig.mobile.color,
-      fill: (u: uPlot, si: number) =>
+      fill: (u: uPlot) =>
         createVerticalGradient(
           u,
           "hsl(var(--chart-2)/5%)",

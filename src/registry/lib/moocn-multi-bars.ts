@@ -39,7 +39,7 @@ export function multiBarPlugin(opts: SeriesBarsPluginOpts = {}): uPlot.Plugin {
 
   let curRadius = userRadius;
   let oldRadius = userRadius;
-  let barSeriesIdxs: number[] = [];
+  const barSeriesIdxs: number[] = [];
   let firstBarIdx: number | null = null;
   let xLayouts: Array<BarDomainLayout | null> = [];
   let stackedYs: Array<StackedY | null> = [];

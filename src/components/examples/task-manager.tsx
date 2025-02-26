@@ -95,7 +95,7 @@ function getSparkOptions(chartVar: number): MoocnOptions {
         stroke: `var(--chart-${chartVar})`,
         width: 2,
         points: { show: false },
-        fill: (u, si) =>
+        fill: (u) =>
           createVerticalGradient(
             u,
             `hsl(var(--chart-${chartVar})/5%)`,
@@ -138,7 +138,7 @@ function getDetailedOptions(chartVar: number): MoocnOptions {
         stroke: `var(--chart-${chartVar})`,
         width: 2,
         points: { show: false },
-        fill: (u, si) =>
+        fill: (u) =>
           createVerticalGradient(
             u,
             `hsl(var(--chart-${chartVar})/5%)`,

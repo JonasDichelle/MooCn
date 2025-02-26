@@ -12,8 +12,9 @@ import { SimpleLineChart } from "@/components/examples/simple-line-chart";
 import SineStreamChart from "@/components/examples/sine-wave-stream";
 import MultiseriesBarchartExample from "@/components/examples/bar-chart-multiple";
 import SimpleAreaStacked from "@/components/examples/simple-area-stacked";
-import LineChartsHigh from "@/components/examples/line-chart-high"; // your "1 million points" line chart
+import LineChartsHigh from "@/components/examples/line-chart-high";
 import TaskManagerChart from "@/components/examples/task-manager";
+import { Github } from "lucide-react";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"basics" | "stress-tests">(
@@ -50,11 +51,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img
-                  src="/assets/github-mark.svg"
-                  alt="GitHub"
-                  className="h-5 w-5 invert dark:invert-0"
-                />
+                <Github />
               </a>
             </Button>
           </div>
