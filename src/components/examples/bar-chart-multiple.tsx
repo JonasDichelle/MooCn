@@ -57,16 +57,16 @@ const seriesConfig = [
 ];
 
 const options: MoocnOptions = {
-  select: { show: false } as uPlot.Select,
+  select: { show: false },
   scales: {
     y: {
-      range: (u, min, max) => [0, 500],
+      range: (u, min, max) => [0, max],
     },
     x: { time: false },
   },
   plugins: [
     multiBarPlugin({
-      stacked: true,
+      stacked: false,
       ignore: [],
       radius: 0.1,
       groupWidth: 0.8,

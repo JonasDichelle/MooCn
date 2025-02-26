@@ -210,7 +210,6 @@ export function AreaChartInteractive() {
         fill: (u: uPlot, si: number) =>
           createVerticalGradient(
             u,
-            si,
             "hsl(var(--chart-2)/5%)",
             "hsl(var(--chart-2))"
           ),
@@ -227,7 +226,6 @@ export function AreaChartInteractive() {
         fill: (u: uPlot, si: number) =>
           createVerticalGradient(
             u,
-            si,
             "hsl(var(--chart-1)/5%)",
             "hsl(var(--chart-1))"
           ),

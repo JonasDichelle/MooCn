@@ -124,17 +124,31 @@ export function useThemeMode() {
 
 export function createVerticalGradient(
   u: uPlot,
-  seriesIdx: number,
   topColor: string,
   bottomColor: string
 ) {
   const ctx = u.ctx;
   const scaleKey = "y";
-  const yMin = u.scales[scaleKey].min!;
-  const yMax = u.scales[scaleKey].max!;
-  const y0 = u.valToPos(yMin, scaleKey, true);
-  const y1 = u.valToPos(yMax, scaleKey, true);
-  const gradient = ctx.createLinearGradient(0, y0, 0, y1);
+
+  const yMin = isFinite(u.scales[scaleKey].min as number)
+    ? u.scales[scaleKey].min!
+    : 0;
+  const yMax = isFinite(u.scales[scaleKey].max as number)
+    ? u.scales[scaleKey].max!
+    : isFinite(u.height)
+    ? u.height
+    : 400;
+
+  const safeY0 = isFinite(u.valToPos(yMin, scaleKey, true))
+    ? u.valToPos(yMin, scaleKey, true)
+    : 0;
+  const safeY1 = isFinite(u.valToPos(yMax, scaleKey, true))
+    ? u.valToPos(yMax, scaleKey, true)
+    : isFinite(u.height)
+    ? u.height
+    : 400;
+
+  const gradient = ctx.createLinearGradient(0, safeY0, 0, safeY1);
   gradient.addColorStop(0, computeCssColor(topColor));
   gradient.addColorStop(1, computeCssColor(bottomColor));
   return gradient;

@@ -13,6 +13,7 @@ import SineStreamChart from "@/components/examples/sine-wave-stream";
 import MultiseriesBarchartExample from "@/components/examples/bar-chart-multiple";
 import SimpleAreaStacked from "@/components/examples/simple-area-stacked";
 import LineChartsHigh from "@/components/examples/line-chart-high"; // your "1 million points" line chart
+import TaskManagerChart from "@/components/examples/task-manager";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"basics" | "stress-tests">(
@@ -74,6 +75,8 @@ export default function HomePage() {
                 <SimpleLineChart pathType="linear" />
                 <SimpleLineChart pathType="stepped" />
               </div>
+
+              <TaskManagerChart />
             </div>
           )}
 

@@ -105,12 +105,7 @@ const options: MoocnOptions = {
       label: "Moo Wave",
       stroke: "var(--chart-1)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-1)/5%)",
-          "var(--chart-1)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-1)/5%)", "var(--chart-1)"),
       width: 2,
       points: { show: false },
     },
@@ -119,12 +114,7 @@ const options: MoocnOptions = {
       label: "Herd 1",
       stroke: "var(--chart-2)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-2)/5%)",
-          "var(--chart-2)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-2)/5%)", "var(--chart-2)"),
       width: 2,
       points: { show: false },
     },
@@ -132,12 +122,7 @@ const options: MoocnOptions = {
       label: "Herd 2",
       stroke: "var(--chart-3)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-3)/5%)",
-          "var(--chart-3)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-3)/5%)", "var(--chart-3)"),
       width: 2,
       points: { show: false },
     },
@@ -145,12 +130,7 @@ const options: MoocnOptions = {
       label: "Herd 3",
       stroke: "var(--chart-4)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-4)/5%)",
-          "var(--chart-4)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-4)/5%)", "var(--chart-4)"),
       width: 2,
       points: { show: false },
     },
@@ -158,12 +138,7 @@ const options: MoocnOptions = {
       label: "Herd 4",
       stroke: "var(--chart-5)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-5)/5%)",
-          "var(--chart-5)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-5)/5%)", "var(--chart-5)"),
       width: 2,
       points: { show: false },
     },
@@ -171,12 +146,7 @@ const options: MoocnOptions = {
       label: "Herd 5",
       stroke: "var(--chart-1)",
       fill: (u, si) =>
-        createVerticalGradient(
-          u,
-          si,
-          "hsl(var(--chart-1)/5%)",
-          "var(--chart-5)"
-        ),
+        createVerticalGradient(u, "hsl(var(--chart-1)/5%)", "var(--chart-5)"),
       width: 2,
       points: { show: false },
     },

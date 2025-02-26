@@ -81,7 +81,6 @@ const options = {
       fill: (u: uPlot, si: number) =>
         createVerticalGradient(
           u,
-          si,
           "hsl(var(--chart-1)/5%)",
           "hsl(var(--chart-1))"
         ),
@@ -98,7 +97,6 @@ const options = {
       fill: (u: uPlot, si: number) =>
         createVerticalGradient(
           u,
-          si,
           "hsl(var(--chart-2)/5%)",
           "hsl(var(--chart-2))"
         ),
